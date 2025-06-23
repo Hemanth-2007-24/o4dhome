@@ -1,0 +1,77 @@
+<!-- FILENAME: frontend/profile.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Profile - O4D</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="top-navbar"><a href="index.html" class="logo">O4D</a><div class="header-controls"><button id="logout-btn" class="btn">Logout</button></div></header>
+    <main class="page-container" style="padding-top: 5rem;">
+        <h1 class="section-title">Your <span>Profile</span></h1>
+        <div class="card auth-card">
+            <div class="card-content">
+                <form id="profile-form">
+                    <div style="margin-bottom: 1rem;"><label for="profile-name" style="display: block; margin-bottom: 0.5rem; color: var(--text-muted);">Name</label><input type="text" id="profile-name" class="form-input" required></div>
+                    <div style="margin-bottom: 1rem;"><label for="profile-email" style="display: block; margin-bottom: 0.5rem; color: var(--text-muted);">Email</label><input type="email" id="profile-email" class="form-input" disabled></div>
+                    <div style="margin-bottom: 1.5rem;"><label for="profile-bio" style="display: block; margin-bottom: 0.5rem; color: var(--text-muted);">Short Bio</label><textarea id="profile-bio" class="form-input" rows="4" placeholder="Tell us about yourself..."></textarea></div>
+                    <button type="submit" class="btn" style="width: 100%;">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </main>
+    <div class="toast-notification"></div>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const API_BASE_URL = ''; // Use relative path
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+
+        if (!currentUser) {
+            window.location.replace('index.html');
+            return;
+        }
+
+        const profileForm = document.getElementById('profile-form');
+        const nameInput = document.getElementById('profile-name');
+        const emailInput = document.getElementById('profile-email');
+        const bioInput = document.getElementById('profile-bio');
+
+        // Populate form
+        nameInput.value = currentUser.name || '';
+        emailInput.value = currentUser.email || '';
+        bioInput.value = currentUser.bio || '';
+
+        profileForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/profile`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-User-Email': currentUser.email },
+                    body: JSON.stringify({ name: nameInput.value.trim(), bio: bioInput.value.trim() })
+                });
+                const updatedUser = await response.json();
+                if (!response.ok) {
+                    showToast(updatedUser.message || 'Failed to update.', 'error');
+                } else {
+                    localStorage.setItem('currentUser', JSON.stringify(updatedUser)); // Update session
+                    showToast('Profile updated successfully!', 'success');
+                }
+            } catch (error) {
+                showToast('Server error. Please try again.', 'error');
+            }
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            localStorage.removeItem('currentUser');
+            showToast('Logging out...', 'success');
+            setTimeout(() => { window.location.replace('index.html'); }, 1000);
+        });
+
+        function showToast(message, type = 'success') { const t = document.querySelector('.toast-notification'); t.textContent = message; t.className = `toast-notification ${type} show`; setTimeout(() => { t.classList.remove('show'); }, 4000); }
+    });
+    </script>
+</body>
+</html>

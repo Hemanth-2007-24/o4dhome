@@ -1,0 +1,34 @@
+# FILENAME: render.yaml
+# This file is used to deploy your services on Render.
+
+services:
+  # The Backend (Node.js Express Server)
+  - type: web
+    name: o4d-backend # Choose a unique name
+    runtime: node
+    plan: free # Or your preferred plan
+    repo: https://github.com/YOUR_USERNAME/YOUR_REPO_NAME # CHANGE THIS
+    rootDir: backend
+    buildCommand: "npm install"
+    startCommand: "node server.js"
+    envVars:
+      - fromGroup: o4d-secrets # Name of the secret group you'll create
+
+  # The Frontend (Static HTML/CSS/JS)
+  - type: static
+    name: o4d-frontend # Choose a unique name
+    plan: free
+    repo: https://github.com/YOUR_USERNAME/YOUR_REPO_NAME # CHANGE THIS
+    rootDir: frontend
+    # This rule is the magic. It tells Render to forward any request
+    # starting with /api to your backend service.
+    routes:
+      - type: rewrite
+        source: /api/*
+        destination: https://o4d-backend.onrender.com/api/* # CHANGE "o4d-backend" to your backend service name
+    # This rule ensures that direct navigation to pages like /profile.html works
+    # If not needed, you can remove it. For SPA, it's crucial.
+    # For this MPA, it's less critical but good practice.
+      - type: rewrite
+        source: /*
+        destination: /index.html

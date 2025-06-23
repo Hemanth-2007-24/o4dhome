@@ -1,0 +1,334 @@
+<!-- FILENAME: frontend/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- IMPORTANT: ADD YOUR CLIENT IDS HERE -->
+    <meta name="google-signin-client_id" content="YOUR_GOOGLE_CLIENT_ID">
+    <meta property="fb:app_id" content="YOUR_FACEBOOK_APP_ID" />
+    
+    <title>O4D - Advanced Digital Solutions</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <link rel="stylesheet" href="style.css"> 
+</head>
+<body>
+    <!-- Custom Cursor -->
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline"></div>
+    
+    <!-- Starry Background -->
+    <div id="background-animation">
+        <div id="stars1"></div>
+        <div id="stars2"></div>
+        <div id="stars3"></div>
+    </div>
+    
+    <div id="fb-root"></div>
+    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
+
+    <header class="top-navbar">
+        <a href="#hero" class="logo">O4D</a>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="#services" class="nav-link">Services</a></li>
+                <li><a href="#experts" class="nav-link">Experts</a></li>
+                <li><a href="#auth" class="nav-link">Login</a></li>
+                <li><a href="#contact" class="nav-link">Contact</a></li>
+            </ul>
+        </nav>
+        <div class="header-controls">
+            <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Theme"><i class="fas fa-moon"></i></button>
+        </div>
+    </header>
+
+    <main class="page-container">
+
+        <!-- (Hero, Services, Experts, and Auth sections are unchanged) -->
+        <section id="hero" class="hero-section">
+            <div class="hero-content tilt-card">
+                <h1>Pioneering Your Digital Future</h1>
+                <p>We build cutting-edge web solutions, immersive 3D experiences, and AI-powered applications that drive growth and innovation.</p>
+                <div class="hero-buttons">
+                    <a href="#services" class="btn">Explore Services</a>
+                    <a href="#contact" class="btn btn-secondary">Get in Touch</a>
+                </div>
+            </div>
+        </section>
+        <section id="services" class="section">
+            <h2 class="section-title">Our <span>Services</span></h2>
+            <div class="card-grid">
+                <a href="#" class="card-link tilt-card"><article class="card"><div class="card-content"><i class="fas fa-cubes card-icon"></i><h3>3D Web Development</h3><p>Engage your audience with interactive 3D models, animations, and virtual environments directly in their browser.</p><span class="read-more">Learn More <span class="arrow">→</span></span></div></article></a>
+                <a href="#" class="card-link tilt-card"><article class="card"><div class="card-content"><i class="fas fa-robot card-icon"></i><h3>AI Integration</h3><p>Leverage the power of artificial intelligence to automate processes, gain insights, and create smarter applications.</p><span class="read-more">Learn More <span class="arrow">→</span></span></div></article></a>
+                <a href="#" class="card-link tilt-card"><article class="card"><div class="card-content"><i class="fas fa-palette card-icon"></i><h3>UI/UX Design</h3><p>Crafting intuitive, beautiful, and user-centric designs that provide seamless experiences across all devices.</p><span class="read-more">Learn More <span class="arrow">→</span></span></div></article></a>
+            </div>
+        </section>
+        <section id="experts" class="section">
+            <h2 class="section-title">Meet Our <span>Experts</span></h2>
+            <div class="card-grid experts-grid">
+                <div class="card expert-card"><img src="https://i.pravatar.cc/150?img=68" alt="Expert 1" class="expert-avatar"><h3 class="expert-name">Alex Johnson</h3><p class="expert-title">Lead 3D Architect</p><div class="expert-socials"><a href="#"><i class="fab fa-twitter"></i></a><a href="#"><i class="fab fa-linkedin-in"></i></a><a href="#"><i class="fab fa-github"></i></a></div></div>
+                <div class="card expert-card"><img src="https://i.pravatar.cc/150?img=49" alt="Expert 2" class="expert-avatar"><h3 class="expert-name">Samantha Lee</h3><p class="expert-title">AI & ML Specialist</p><div class="expert-socials"><a href="#"><i class="fab fa-twitter"></i></a><a href="#"><i class="fab fa-linkedin-in"></i></a><a href="#"><i class="fab fa-github"></i></a></div></div>
+                <div class="card expert-card"><img src="https://i.pravatar.cc/150?img=32" alt="Expert 3" class="expert-avatar"><h3 class="expert-name">Michael Chen</h3><p class="expert-title">Head of UI/UX</p><div class="expert-socials"><a href="#"><i class="fab fa-twitter"></i></a><a href="#"><i class="fab fa-linkedin-in"></i></a><a href="#"><i class="fab fa-dribbble"></i></a></div></div>
+            </div>
+        </section>
+        <section id="auth" class="section">
+            <h2 class="section-title">Join <span>O4D</span></h2>
+            <div class="card auth-card tilt-card">
+                <div class="card-content">
+                    <div class="auth-tabs"><div class="auth-tab active" data-form="login">Login</div><div class="auth-tab" data-form="signup">Sign Up</div></div>
+                    <div id="login-form-container"><p style="text-align:center; margin-bottom: 1.5rem; color: var(--text-muted);">Login to access your services.</p><form id="manual-login-form" class="auth-form"><input type="email" name="email" class="form-input" placeholder="Email Address" required><input type="password" name="password" class="form-input" placeholder="Password" required><button type="submit" class="btn" style="width:100%;">Login</button></form></div>
+                    <div id="signup-form-container" style="display: none;"><p style="text-align:center; margin-bottom: 1.5rem; color: var(--text-muted);">Create an account to get started.</p><form id="manual-signup-form" class="auth-form"><input type="text" name="name" class="form-input" placeholder="Your Name" required><input type="email" name="email" class="form-input" placeholder="Email Address" required><input type="password" name="password" class="form-input" placeholder="Password" required><button type="submit" class="btn" style="width:100%;">Sign Up</button></form></div>
+                    <div class="divider">OR</div>
+                    <div class="social-login-options">
+                        <div id="google-signin-btn"></div>
+                        <a id="facebook-signin-btn" class="social-btn"><i class="fab fa-facebook-f"></i> Continue with Facebook</a>
+                        <a id="github-signin-btn" href="#" class="social-btn"><i class="fab fa-github"></i> Continue with GitHub</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="section">
+            <h2 class="section-title">Get In <span>Touch</span></h2>
+            <div class="card contact-card">
+                <div class="contact-container">
+                    <div class="contact-info">
+                        <h3>Contact Information</h3>
+                        <p>Have a project in mind or just want to say hello? We'd love to hear from you.</p>
+                        <ul>
+                            <li><i class="fas fa-map-marker-alt"></i> 123 Innovation Drive, Tech City</li>
+                            <li><i class="fas fa-phone"></i> (123) 456-7890</li>
+                            <li><i class="fas fa-envelope"></i> contact@o4d.dev</li>
+                        </ul>
+                    </div>
+                    <div class="contact-form-container">
+                        <form id="contact-form" class="contact-form">
+                            <!-- Input fields MUST have a 'name' attribute matching the EmailJS template -->
+                            <input type="text" name="name" class="form-input" placeholder="Your Name" required>
+                            <input type="email" name="email" class="form-input" placeholder="Your Email" required>
+                            <input type="text" name="subject" class="form-input" placeholder="Subject" required>
+                            <textarea name="message" rows="5" class="form-input" placeholder="Your Message" required></textarea>
+                            <button type="submit" class="btn" style="width: 100%;">Send Message</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="main-footer">
+        <div class="footer-content">
+            <div class="footer-section"><h4>About O4D</h4><p>O4D is a collective of designers, developers, and strategists dedicated to pushing the boundaries of digital innovation.</p></div>
+            <div class="footer-section"><h4>Quick Links</h4><ul><li><a href="#hero">Home</a></li><li><a href="#services">Services</a></li><li><a href="#experts">Experts</a></li><li><a href="#contact">Contact</a></li></ul></div>
+            <div class="footer-section"><h4>Connect With Us</h4><div class="social-icons"><a href="#" class="social-btn"><i class="fab fa-twitter"></i></a><a href="#" class="social-btn"><i class="fab fa-linkedin-in"></i></a><a href="#" class="social-btn"><i class="fab fa-github"></i></a><a href="#" class="social-btn"><i class="fab fa-dribbble"></i></a></div></div>
+        </div>
+        <div class="footer-bottom">© 2024 O4D - Open for Discussion. All Rights Reserved.</div>
+    </footer>
+
+    <div class="toast-notification"></div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- CONFIGURATION ---
+        const API_BASE_URL = ''; 
+        const GITHUB_CLIENT_ID = 'YOUR_GITHUB_CLIENT_ID'; 
+        const ADMIN_EMAIL = "info.open4discuss@gmail.com";
+
+        // --- UI INITIALIZATION ---
+        initCustomCursor();
+        init3dTiltEffect();
+        initScrollReveal();
+        initThemeToggle();
+        initAuthSystem();
+        initContactForm(); // <-- Add this line
+
+        // --- 1. 3D TILT & MOUSE EFFECT (Unchanged) ---
+        function initCustomCursor() {
+            const cursorDot = document.querySelector(".cursor-dot");
+            const cursorOutline = document.querySelector(".cursor-outline");
+            const interactiveElements = document.querySelectorAll('a, button, .auth-tab, .social-btn');
+            window.addEventListener("mousemove", (e) => {
+                const posX = e.clientX; const posY = e.clientY;
+                cursorDot.style.left = `${posX}px`; cursorDot.style.top = `${posY}px`;
+                cursorOutline.animate({ left: `${posX}px`, top: `${posY}px` }, { duration: 500, fill: "forwards" });
+            });
+            interactiveElements.forEach(el => {
+                el.addEventListener('mouseenter', () => cursorOutline.classList.add('cursor-hover'));
+                el.addEventListener('mouseleave', () => cursorOutline.classList.remove('cursor-hover'));
+            });
+        }
+        function init3dTiltEffect() {
+            const tiltCards = document.querySelectorAll('.tilt-card');
+            tiltCards.forEach(card => {
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect(); const x = e.clientX - rect.left; const y = e.clientY - rect.top;
+                    const centerX = card.offsetWidth / 2; const centerY = card.offsetHeight / 2;
+                    const deltaX = x - centerX; const deltaY = y - centerY;
+                    const rotateX = (deltaY / centerY) * -7; const rotateY = (deltaX / centerX) * 7;
+                    requestAnimationFrame(() => { card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`; });
+                });
+                card.addEventListener('mouseleave', () => {
+                     requestAnimationFrame(() => { card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale(1)'; });
+                });
+            });
+        }
+        
+        // --- 2. DYNAMIC UI BEHAVIORS (Unchanged) ---
+        function initScrollReveal() {
+            const sections = document.querySelectorAll('.section');
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+            sections.forEach(section => observer.observe(section));
+        }
+        function initThemeToggle() {
+            const themeToggle = document.getElementById('theme-toggle');
+            themeToggle.addEventListener('click', () => {
+                document.body.classList.toggle('light-theme');
+                const isLight = document.body.classList.contains('light-theme');
+                themeToggle.innerHTML = isLight ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+            });
+        }
+        
+        // --- NEW: 4. CONTACT FORM LOGIC ---
+        function initContactForm() {
+            const contactForm = document.getElementById('contact-form');
+            contactForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const submitBtn = this.querySelector('button[type="submit"]');
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner" style="border-top-color: #0d1117;"></span> Sending...';
+
+                // Replace with your actual EmailJS IDs
+                const SERVICE_ID = 'service_hi17z3a';
+                const TEMPLATE_ID = 'template_xkwjp1s';
+                const PUBLIC_KEY = 'VmSXjkRdvIgE1xlf_';
+
+                emailjs.sendForm(SERVICE_ID, TEMPLATE_ID, this, PUBLIC_KEY)
+                    .then(() => {
+                        showToast('Message sent successfully! We will get back to you soon.', 'success');
+                        this.reset(); // Clear the form
+                    })
+                    .catch((err) => {
+                        showToast('Failed to send message. Please try again.', 'error');
+                        console.error('EmailJS Error:', JSON.stringify(err));
+                    })
+                    .finally(() => {
+                        // Re-enable the button regardless of success or failure
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = 'Send Message';
+                    });
+            });
+        }
+
+
+        // --- 3. AUTHENTICATION SYSTEM (Mostly Unchanged) ---
+        // Helper function showToast is now used by contact form as well
+        function showToast(message, type = 'success') { const t = document.querySelector('.toast-notification'); t.textContent = message; t.className = `toast-notification ${type} show`; setTimeout(() => { t.classList.remove('show'); }, 4000); }
+        
+        function initAuthSystem() {
+            function setCurrentUser(user) { localStorage.setItem('currentUser', JSON.stringify(user)); }
+            function redirectToPanel(user) { const dest = user.email === ADMIN_EMAIL ? 'admin.html' : 'profile.html'; window.location.replace(dest); }
+
+            async function apiRequest(endpoint, method = 'POST', body = null) {
+                try {
+                    const options = { method, headers: { 'Content-Type': 'application/json' } };
+                    if (body) options.body = JSON.stringify(body);
+                    const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
+                    const data = await response.json();
+                    if (!response.ok) { showToast(data.message || 'An error occurred.', 'error'); return null; }
+                    return data;
+                } catch (error) { showToast('Could not connect to the server.', 'error'); return null; }
+            }
+            function handleSuccessfulLogin(user, method) {
+                setCurrentUser(user);
+                showToast(`${method} login successful! Redirecting...`, 'success');
+                setTimeout(() => redirectToPanel(user), 1500);
+            }
+            (function handleGitHubRedirect() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const sessionData = urlParams.get('session');
+                if (sessionData) {
+                    try {
+                        const decodedUser = JSON.parse(atob(sessionData));
+                        handleSuccessfulLogin(decodedUser, 'GitHub');
+                    } catch (e) {
+                        showToast('Invalid session data from redirect.', 'error');
+                    } finally {
+                        window.history.replaceState(null, '', window.location.pathname);
+                    }
+                }
+            })();
+            function initAuthForms() {
+                const loginForm = document.getElementById('manual-login-form');
+                const signupForm = document.getElementById('manual-signup-form');
+                document.querySelectorAll('.auth-tab').forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        document.querySelector('.auth-tab.active').classList.remove('active');
+                        tab.classList.add('active');
+                        const isLogin = tab.dataset.form === 'login';
+                        document.getElementById('login-form-container').style.display = isLogin ? 'block' : 'none';
+                        document.getElementById('signup-form-container').style.display = isLogin ? 'none' : 'block';
+                    });
+                });
+                loginForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const user = await apiRequest('/api/login', 'POST', { email: loginForm.email.value, password: loginForm.password.value });
+                    if (user) handleSuccessfulLogin(user, 'Manual');
+                });
+                signupForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const user = await apiRequest('/api/register', 'POST', { name: signupForm.name.value, email: signupForm.email.value, password: signupForm.password.value });
+                    if (user) handleSuccessfulLogin(user, 'Registration');
+                });
+            }
+            function initSocialLogins() {
+                window.onGoogleLibraryLoad = () => {
+                    google.accounts.id.initialize({
+                        client_id: document.querySelector('meta[name="google-signin-client_id"]').content,
+                        callback: async (response) => {
+                            const decoded = JSON.parse(atob(response.credential.split('.')[1]));
+                            const user = await apiRequest('/api/social-login', 'POST', { name: decoded.name, email: decoded.email, loginMethod: 'google' });
+                            if (user) handleSuccessfulLogin(user, 'Google');
+                        }
+                    });
+                    google.accounts.id.renderButton(document.getElementById('google-signin-btn'),{ theme: 'outline', size: 'large', type: 'standard', text: 'continue_with', shape: 'pill', width: '330'});
+                };
+                window.fbAsyncInit = () => { FB.init({ appId: document.querySelector('meta[property="fb:app_id"]').content, cookie: true, xfbml: true, version: 'v19.0' }); };
+                document.getElementById('facebook-signin-btn').addEventListener('click', () => {
+                    FB.login(res => {
+                        if (res.authResponse) {
+                            FB.api('/me', { fields: 'name, email' }, async apiRes => {
+                                if (!apiRes.email) return showToast('Could not retrieve email from Facebook.', 'error');
+                                const user = await apiRequest('/api/social-login', 'POST', { name: apiRes.name, email: apiRes.email, loginMethod: 'facebook' });
+                                if (user) handleSuccessfulLogin(user, 'Facebook');
+                            });
+                        }
+                    }, { scope: 'email,public_profile' });
+                });
+                document.getElementById('github-signin-btn').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    window.location.href = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}`;
+                });
+            }
+            initAuthForms();
+            initSocialLogins();
+        }
+    });
+    </script>
+</body>
+</html>

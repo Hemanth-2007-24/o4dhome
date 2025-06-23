@@ -1,0 +1,84 @@
+<!-- FILENAME: frontend/admin.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - O4D</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="top-navbar"><a href="index.html" class="logo">O4D Admin</a><div class="header-controls"><button id="logout-btn" class="btn">Logout</button></div></header>
+    <main class="page-container" style="padding-top: 5rem;">
+        <h1 class="section-title">User <span>Database</span></h1>
+        <div class="card data-table-container">
+            <table class="data-table">
+                <thead><tr><th>Name</th><th>Email</th><th>Login Method</th><th>Joined On</th><th>Bio</th></tr></thead>
+                <tbody id="user-table-body"><tr><td colspan="5" style="text-align:center;">Loading...</td></tr></tbody>
+            </table>
+        </div>
+    </main>
+    <div class="toast-notification"></div>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const API_BASE_URL = ''; // Use relative path
+        const ADMIN_EMAIL = "info.open4discuss@gmail.com";
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+
+        if (!currentUser || currentUser.email !== ADMIN_EMAIL) {
+            window.location.replace('index.html');
+            return;
+        }
+
+        const userTableBody = document.getElementById('user-table-body');
+
+        async function loadUsers() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/users`, {
+                    headers: { 'X-User-Email': currentUser.email } // Authentication header
+                });
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Could not fetch users.');
+                }
+                
+                userTableBody.innerHTML = '';
+                if (data.length === 0) {
+                    userTableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;">No other users have registered yet.</td></tr>`;
+                    return;
+                }
+
+                data.forEach(user => {
+                    const joinDate = new Date(user.createdAt).toLocaleDateString();
+                    const loginMethod = user.loginMethod || 'manual';
+                    const icon = loginMethod.includes('facebook') ? 'facebook-f' : (loginMethod === 'manual' ? 'envelope' : loginMethod);
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${user.name || 'N/A'}</td>
+                        <td>${user.email}</td>
+                        <td><i class="fab fa-${icon}"></i> ${loginMethod.charAt(0).toUpperCase() + loginMethod.slice(1)}</td>
+                        <td>${joinDate}</td>
+                        <td>${user.bio || ''}</td>
+                    `;
+                    userTableBody.appendChild(row);
+                });
+            } catch (error) {
+                userTableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color: var(--error-color);">${error.message}</td></tr>`;
+            }
+        }
+
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            localStorage.removeItem('currentUser');
+            showToast('Logging out...', 'success');
+            setTimeout(() => { window.location.replace('index.html'); }, 1000);
+        });
+
+        function showToast(message, type = 'success') { const t = document.querySelector('.toast-notification'); t.textContent = message; t.className = `toast-notification ${type} show`; setTimeout(() => { t.classList.remove('show'); }, 4000); }
+
+        loadUsers();
+    });
+    </script>
+</body>
+</html>
