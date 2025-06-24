@@ -6,51 +6,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - O4D</title>
     <meta name="robots" content="noindex, nofollow">
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="https://o4dhome.odoo.com/web/image/website/1/logo/o4dhome?unique=8aacd3c">
-    
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Shared styles from index.html for background and theme */
         body { background: linear-gradient(180deg, #0d1117 0%, #161b22 100%); background-attachment: fixed; color: var(--text-color, #e0e0e0); }
         body.light-theme { background: #f8f9fa; color: #212529; }
         body.light-theme .top-navbar { background-color: #e9ecef; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        body.light-theme .logo, body.light-theme .nav-link { color: #343a40; }
         body.light-theme .logo { color: #fd7e14; }
-        body.light-theme .theme-toggle-btn, body.light-theme .btn { color: #343a40; }
         body.light-theme .card { background-color: #ffffff; border: 1px solid #dee2e6; }
-        body.light-theme h1, body.light-theme h2, body.light-theme h3, body.light-theme p { color: #212529; }
-        body.light-theme .section-title span { color: #fd7e14; }
         
-        /* Admin Page Specific Styles */
-        .admin-table-container { padding: 1.5rem; overflow-x: auto; }
-        .user-table { width: 100%; border-collapse: collapse; white-space: nowrap; }
-        .user-table th, .user-table td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--card-border); }
-        .user-table th { font-weight: 600; color: var(--primary-color); }
-        body.light-theme .user-table th { color: #fd7e14; }
-        .user-table tbody tr { transition: background-color 0.3s ease; }
+        .user-table tbody tr { cursor: pointer; transition: background-color 0.3s ease; }
         .user-table tbody tr:hover { background-color: rgba(255, 255, 255, 0.05); }
         body.light-theme .user-table tbody tr:hover { background-color: #f1f3f5; }
-
         .user-info { display: flex; align-items: center; gap: 15px; }
         .user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
-        .login-method { display: flex; align-items: center; gap: 8px; text-transform: capitalize; }
-        .login-method .fab, .login-method .fas { font-size: 1.2rem; }
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); z-index: 1000; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease; }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        
+        .modal-content { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; width: 90%; max-width: 600px; padding: 2.5rem; position: relative; transform: scale(0.95); transition: transform 0.3s ease; }
+        .modal-overlay.active .modal-content { transform: scale(1); }
+        body.light-theme .modal-content { background: #fff; }
+
+        .modal-close { position: absolute; top: 15px; right: 20px; font-size: 2rem; color: var(--text-muted); cursor: pointer; transition: color 0.3s ease; }
+        .modal-close:hover { color: var(--primary-color); }
+
+        .modal-header { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem; }
+        .modal-avatar { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; }
+        .modal-header-info h3 { font-size: 1.8rem; margin: 0; }
+        .modal-header-info p { margin: 0; color: var(--text-muted); font-size: 0.9rem; word-break: break-all; }
+        
+        .modal-body ul { list-style: none; padding: 0; }
+        .modal-body li { display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 0; border-bottom: 1px solid var(--card-border); }
+        .modal-body li strong { color: var(--primary-color); }
+        body.light-theme .modal-body li strong { color: #fd7e14; }
+        .modal-body li span { text-align: right; max-width: 65%; word-break: break-word;}
+        .modal-bio { margin-top: 1.5rem; padding: 1rem; background-color: rgba(0,0,0,0.2); border-radius: 8px; }
+        
+        .modal-footer { margin-top: 2rem; text-align: right; }
+        .btn-danger { background: var(--error-color); color: #fff; box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4); }
+        .btn-danger:hover { background: #c82333; filter: brightness(1.1); }
+        body.no-scroll { overflow: hidden; }
     </style>
 </head>
 <body>
     <div class="cursor-dot"></div>
     <div class="cursor-outline"></div>
-
-    <header class="top-navbar">
-        <a href="index.html" class="logo">O4D Admin</a>
-        <div class="header-controls">
-            <button id="logout-btn" class="btn">Logout</button>
-            <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Theme"><i class="fas fa-moon"></i></button>
-        </div>
-    </header>
+    <header class="top-navbar"><!-- (your consistent header HTML) --></header>
 
     <main class="page-container" style="padding-top: 5rem;">
         <section class="section is-visible">
@@ -59,17 +63,10 @@
                 <div class="admin-table-container">
                     <table class="user-table">
                         <thead>
-                            <tr>
-                                <th>User</th>
-                                <th>Email</th>
-                                <th>Login Method</th>
-                                <th>Joined On</th>
-                                <th>Last Seen</th> <!-- NEW: Last Seen Column -->
-                            </tr>
+                            <tr><th>User</th><th>Email</th><th>Provider</th><th>Joined Date</th></tr>
                         </thead>
                         <tbody id="user-table-body">
-                            <!-- User rows will be injected here by JavaScript -->
-                            <tr><td colspan="5" style="text-align:center; padding: 3rem;">Loading...</td></tr>
+                            <tr><td colspan="4" style="text-align:center; padding: 3rem;">Loading...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -77,92 +74,130 @@
         </section>
     </main>
 
+    <div class="modal-overlay" id="user-modal">
+        <div class="modal-content">
+            <span class="modal-close" id="modal-close-btn">×</span>
+            <div class="modal-header">
+                <img src="" alt="User Avatar" class="modal-avatar" id="modal-avatar">
+                <div class="modal-header-info">
+                    <h3 id="modal-name"></h3>
+                    <p id="modal-email"></p>
+                </div>
+            </div>
+            <div class="modal-body">
+                <h4>User Details</h4>
+                <ul>
+                    <li><strong>Provider:</strong> <span id="modal-provider"></span></li>
+                    <li><strong>Joined:</strong> <span id="modal-joined"></span></li>
+                    <li><strong>Last Login:</strong> <span id="modal-last-login"></span></li>
+                    <li><strong>Last Login IP:</strong> <span id="modal-ip"></span></li>
+                    <li><strong>OS & Browser:</strong> <span id="modal-user-agent"></span></li>
+                </ul>
+                <div class="modal-bio">
+                    <strong>Bio:</strong>
+                    <p id="modal-bio" style="margin-top: 0.5rem;"></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" id="delete-user-btn">Delete User</button>
+            </div>
+        </div>
+    </div>
+
     <div class="toast-notification"></div>
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
+        let allUsersData = []; 
         const API_BASE_URL = '';
         const ADMIN_EMAIL = "info.open4discuss@gmail.com";
         const currentUser = JSON.parse(localStorage.getItem('currentUser'));
 
-        // Auth Guard
-        if (!currentUser || currentUser.email !== ADMIN_EMAIL) {
-            window.location.replace('index.html');
-            return;
-        }
+        if (!currentUser || currentUser.email !== ADMIN_EMAIL) { window.location.replace('index.html'); return; }
 
         const userTableBody = document.getElementById('user-table-body');
-        
-        initUI();
+        const userModal = document.getElementById('user-modal');
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+        const deleteUserBtn = document.getElementById('delete-user-btn');
+
         loadUsers();
 
-        document.getElementById('logout-btn').addEventListener('click', () => {
-            localStorage.removeItem('currentUser');
-            showToast('Logging out...', 'success');
-            setTimeout(() => { window.location.replace('index.html'); }, 1000);
-        });
+        modalCloseBtn.addEventListener('click', closeModal);
+        userModal.addEventListener('click', (e) => { if (e.target === userModal) closeModal(); });
+        deleteUserBtn.addEventListener('click', handleDeleteUser);
 
         async function loadUsers() {
             try {
-                const response = await fetch(`${API_BASE_URL}/api/users`, {
-                    headers: { 'X-User-Email': currentUser.email }
-                });
+                const response = await fetch(`${API_BASE_URL}/api/users`, { headers: { 'X-User-Email': currentUser.email }});
                 const users = await response.json();
-
                 if (!response.ok) throw new Error(users.message || 'Could not fetch users.');
-                
-                userTableBody.innerHTML = ''; 
+                allUsersData = users; 
+                userTableBody.innerHTML = '';
                 if (users.length === 0) {
-                    userTableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 3rem;">No other users found.</td></tr>`;
+                    userTableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 3rem;">No other users found.</td></tr>`;
                     return;
                 }
-
-                users.forEach(user => {
+                users.forEach((user, index) => {
                     const row = document.createElement('tr');
-                    
+                    row.setAttribute('data-index', index);
                     const loginMethod = user.loginMethod || 'manual';
                     const iconClass = getIconForMethod(loginMethod);
                     const defaultAvatar = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2FkYmFjNyI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgM2MxLjY2IDAgMyAxLjM0IDMgM3MtMS4zNCAzLTMgMy0zLTEuMzQtMy0zIDEuMzQtMyAzLTN6bTAgMTRjLTIuMzMgMC00LjMyLTEuNDYtNS4xMi0zLjUxLjc5LTEuMjkgMi44Mi0yLjEzIDUuMTItMi4xMyAyLjI5IDAgNC4zMy44NCA1LjEyIDIuMTNDMTYuMzIgMTcuNTQgMTQuMzMgMTkgMTIgMTl6Ii8+PC9zdmc+';
-
                     row.innerHTML = `
-                        <td>
-                            <div class="user-info">
-                                <img src="${user.picture || defaultAvatar}" alt="${user.name}" class="user-avatar">
-                                <span>${user.name || 'N/A'}</span>
-                            </div>
-                        </td>
+                        <td><div class="user-info"><img src="${user.picture || defaultAvatar}" alt="${user.name}" class="user-avatar"><span>${user.name || 'N/A'}</span></div></td>
                         <td>${user.email}</td>
-                        <td>
-                            <div class="login-method">
-                                <i class="${iconClass}"></i>
-                                <span>${loginMethod.split(',')[0]}</span>
-                            </div>
-                        </td>
+                        <td><div class="login-method"><i class="${iconClass}"></i><span>${loginMethod.split(',')[0]}</span></div></td>
                         <td>${new Date(user.createdAt).toLocaleDateString()}</td>
-                        <td>${formatTimeAgo(user.lastLoginAt)}</td>
                     `;
+                    row.addEventListener('click', () => displayUserDetails(index));
                     userTableBody.appendChild(row);
-                });
+});
+            } catch (error) { userTableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--error-color);">${error.message}</td></tr>`; }
+        }
 
+        function displayUserDetails(index) {
+            const user = allUsersData[index];
+            if (!user) return;
+            deleteUserBtn.dataset.userId = user._id;
+            document.getElementById('modal-avatar').src = user.picture || '...';
+            document.getElementById('modal-name').textContent = user.name || 'N/A';
+            document.getElementById('modal-email').textContent = user.email || 'N/A';
+            document.getElementById('modal-provider').textContent = user.loginMethod || 'N/A';
+            document.getElementById('modal-joined').textContent = new Date(user.createdAt).toLocaleString();
+            document.getElementById('modal-last-login').textContent = user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleString() : 'Never';
+            document.getElementById('modal-ip').textContent = user.lastLoginIp || 'N/A';
+            document.getElementById('modal-user-agent').textContent = user.lastUserAgent || 'N/A';
+            document.getElementById('modal-bio').textContent = user.bio || 'No bio provided.';
+            userModal.classList.add('active');
+            document.body.classList.add('no-scroll');
+        }
+        
+        async function handleDeleteUser() {
+            const userId = deleteUserBtn.dataset.userId;
+            if (!userId) return;
+            if (!confirm('Are you sure you want to permanently delete this user? This action cannot be undone.')) return;
+            deleteUserBtn.disabled = true;
+            deleteUserBtn.innerHTML = '<span class="spinner"></span> Deleting...';
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/users/${userId}`, { method: 'DELETE', headers: { 'X-User-Email': currentUser.email } });
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.message || 'Failed to delete user.');
+                showToast('User deleted successfully!', 'success');
+                closeModal();
+                loadUsers();
             } catch (error) {
-                userTableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color: var(--error-color); padding: 3rem;">${error.message}</td></tr>`;
+                showToast(error.message, 'error');
+            } finally {
+                deleteUserBtn.disabled = false;
+                deleteUserBtn.innerHTML = 'Delete User';
             }
         }
-        
-        // --- UI & HELPER FUNCTIONS ---
-        function initUI() {
-            initCustomCursor();
-            initThemeToggle();
+
+        function closeModal() {
+            userModal.classList.remove('active');
+            document.body.classList.remove('no-scroll');
         }
 
-        function showToast(message, type = 'success') {
-            const t = document.querySelector('.toast-notification');
-            if (!t) return;
-            t.textContent = message;
-            t.className = `toast-notification ${type} show`;
-            setTimeout(() => { t.classList.remove('show'); }, 4000);
-        }
-        
         function getIconForMethod(method) {
             if (method.includes('google')) return 'fab fa-google';
             if (method.includes('facebook')) return 'fab fa-facebook-f';
@@ -170,47 +205,11 @@
             return 'fas fa-envelope';
         }
 
-        // NEW: Function to format dates into a "time ago" string
-        function formatTimeAgo(dateString) {
-            if (!dateString) return 'Never';
-            
-            const date = new Date(dateString);
-            const now = new Date();
-            const seconds = Math.round((now - date) / 1000);
-            
-            const minutes = Math.round(seconds / 60);
-            const hours = Math.round(minutes / 60);
-            const days = Math.round(hours / 24);
-
-            if (seconds < 60) return 'Just now';
-            if (minutes < 60) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
-            if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
-            if (days < 7) return `${days} day${days > 1 ? 's' : ''} ago`;
-            
-            return date.toLocaleDateString(); // Fallback for older dates
-        }
-
-        function initCustomCursor() {
-            const cursorDot = document.querySelector(".cursor-dot");
-            const cursorOutline = document.querySelector(".cursor-outline");
-            const interactiveElements = document.querySelectorAll('a, button');
-            window.addEventListener("mousemove", (e) => {
-                cursorDot.style.left = `${e.clientX}px`;
-                cursorDot.style.top = `${e.clientY}px`;
-                cursorOutline.animate({ left: `${e.clientX}px`, top: `${e.clientY}px` }, { duration: 500, fill: "forwards" });
-            });
-            interactiveElements.forEach(el => {
-                el.addEventListener('mouseenter', () => cursorOutline.classList.add('cursor-hover'));
-                el.addEventListener('mouseleave', () => cursorOutline.classList.remove('cursor-hover'));
-            });
-        }
-
-        function initThemeToggle() {
-            const themeToggle = document.getElementById('theme-toggle');
-            themeToggle.addEventListener('click', () => {
-                document.body.classList.toggle('light-theme');
-                themeToggle.innerHTML = document.body.classList.contains('light-theme') ? '<i class="fas fa-cog"></i>' : '<i class="fas fa-moon"></i>';
-            });
+        function showToast(message, type = 'success') {
+            const t = document.querySelector('.toast-notification');
+            t.textContent = message;
+            t.className = `toast-notification ${type} show`;
+            setTimeout(() => { t.classList.remove('show'); }, 4000);
         }
     });
     </script>
