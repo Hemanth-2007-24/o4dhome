@@ -217,6 +217,33 @@
         function initCustomCursor() { /* ... same as before ... */ }
         function initThemeToggle() { /* ... same as before ... */ }
         function showToast(message, type = 'success') { /* ... same as before ... */ }
+               function initUI() {
+            initCustomCursor(); // Ensure this is called
+            initThemeToggle();
+        }
+
+        // NEW: Add the cursor initialization function
+        function initCustomCursor() {
+            const cursorDot = document.querySelector(".cursor-dot");
+            const cursorOutline = document.querySelector(".cursor-outline");
+            if (!cursorDot || !cursorOutline) return;
+            // Select all interactive elements on this page
+            const interactiveElements = document.querySelectorAll('a, button, input, textarea, .profile-avatar-wrapper');
+            
+            window.addEventListener("mousemove", (e) => {
+                const posX = e.clientX;
+                const posY = e.clientY;
+                cursorDot.style.left = `${posX}px`;
+                cursorDot.style.top = `${posY}px`;
+                cursorOutline.animate({ left: `${posX}px`, top: `${posY}px` }, { duration: 500, fill: "forwards" });
+            });
+            
+            interactiveElements.forEach(el => {
+                el.addEventListener('mouseenter', () => cursorOutline.classList.add('cursor-hover'));
+                el.addEventListener('mouseleave', () => cursorOutline.classList.remove('cursor-hover'));
+            });
+        }
+
     });
     </script>
 </body>
