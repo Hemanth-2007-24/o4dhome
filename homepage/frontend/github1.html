@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeLab - Void-IDE</title>
+    
+    <!-- Libraries -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/material-darker.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark-dimmed.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-body: #02040a;
+            --bg-panel-trans: rgba(10, 15, 30, 0.8);
+            --bg-panel-solid: #0d1117;
+            --text-primary: #e0e8ff;
+            --text-secondary: #a0a8d0;
+            --text-header: #61dafb;
+            --accent-color: #00f2ea;
+            --accent-glow: rgba(0, 242, 234, 0.5);
+            --border-color: rgba(60, 80, 150, 0.4);
+            --border-light-color: rgba(60, 80, 150, 0.2);
+            --error-color: #ff5577;
+            --font-family-body: "Exo 2", sans-serif;
+            --font-family-header: "Orbitron", sans-serif;
+        }
+
+        /* --- Background & Core Layout --- */
+        @keyframes animStar { from { transform: translateY(0px); } to { transform: translateY(-2000px); } }
+        #background-container { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: -1; background-color: var(--bg-body); }
+        .stars { position: absolute; top: 0; left: 50%; width: 1px; height: 1px; background: transparent; box-shadow: -346px 1380px #FFF, 38px 1230px #FFF; animation: animStar 70s linear infinite; }
+        .stars2 { position: absolute; top: 0; left: 50%; width: 2px; height: 2px; background: transparent; box-shadow: -137px 404px #FFF, 150px 789px #FFF; animation: animStar 120s linear infinite; }
+
+        html, body { height: 100%; margin: 0; box-sizing: border-box; overflow: hidden; }
+        body { font-family: var(--font-family-body); background-color: transparent; color: var(--text-primary); display: flex; flex-direction: column; }
+
+        /* --- Header Bar --- */
+        #header-bar { flex-shrink: 0; display: flex; align-items: center; gap: 15px; padding: 8px 15px; background-color: rgba(2, 4, 10, 0.6); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-color); z-index: 100; }
+        #header-bar .logo { font-family: var(--font-family-header); font-size: 1.2em; color: var(--text-header); text-shadow: 0 0 5px var(--accent-glow); }
+        #header-bar input { padding: 6px 10px; font-size: 13px; background-color: var(--bg-panel-solid); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 4px; }
+        #header-bar .auth-section-gh { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+
+        /* --- Sci-Fi Button Style --- */
+        button {
+            background: linear-gradient(45deg, #238636, #2ea043);
+            color: white; border: none; padding: 8px 18px; font-size: 13px;
+            font-family: var(--font-family-body); font-weight: 600; cursor: pointer;
+            clip-path: polygon(10px 0%, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+            transition: all 0.2s ease-out; transform-style: preserve-3d; position: relative;
+        }
+        button:hover { transform: translateY(-2px) translateZ(25px); box-shadow: 0 10px 20px rgba(0, 242, 234, 0.2); filter: brightness(1.2); }
+        button:disabled { background: #555; cursor: not-allowed; filter: brightness(0.6); transform: none; box-shadow: none; }
+        .actions button { background: linear-gradient(45deg, #334, #556); padding: 4px 12px; font-size: 12px; }
+        .actions button.primary-action { background: linear-gradient(45deg, #fd7e14, #e66800); }
+
+        /* --- Main 3-Panel IDE Layout --- */
+        #app-container { display: flex; flex-grow: 1; overflow: hidden; padding: 15px; gap: 15px; perspective: 3000px; }
+        .panel {
+            display: flex; flex-direction: column; overflow: hidden;
+            background-color: var(--bg-panel-trans); backdrop-filter: blur(15px) saturate(180%);
+            border: 1px solid var(--border-color); border-radius: 8px; position: relative;
+            transform-style: preserve-3d; transition: all 0.4s cubic-bezier(0.2, 1, 0.3, 1);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.6);
+        }
+        .panel:hover { transform: translateZ(15px); }
+        .panel-header { padding: 8px 12px; flex-shrink: 0; border-bottom: 1px solid var(--border-light-color); display: flex; justify-content: space-between; align-items: center; }
+        .panel-header h3 { margin: 0; font-family: var(--font-family-header); font-size: 1em; color: var(--text-header); }
+        .panel-content { flex-grow: 1; overflow: auto; padding: 5px; display: flex; flex-direction: column; }
+
+        #sidebar { flex-basis: 20%; min-width: 250px; }
+        #editor-pane { flex-basis: 50%; min-width: 300px; }
+        #output-pane { flex-basis: 30%; min-width: 250px; }
+
+        /* --- Resizer Handles --- */
+        .resizer { flex-basis: 15px; flex-shrink: 0; cursor: col-resize; z-index: 50; display: flex; align-items: center; justify-content: center; opacity: 0.5; transition: opacity 0.2s; }
+        .resizer:hover { opacity: 1; }
+        .resizer::before { content: '⋮'; color: var(--text-secondary); font-size: 20px; line-height: 0; }
+        
+        /* --- Editor Pane Specifics (CLEANED) --- */
+        #editor-content-area { 
+            position: relative; 
+            flex-grow: 1; 
+            display: flex; 
+            /* REMOVED: `padding: 0` to restore default spacing */
+        }
+        
+        /* REMOVED: The ::after pseudo-element for the scanline effect and the @keyframes scanline animation */
+
+        .CodeMirror { 
+            height: 100%; 
+            font-size: 15px; 
+            /* REMOVED: text-shadow property */
+        }
+
+        /* --- FUTURISTIC ACTIVE LINE OVERLAY --- */
+        @keyframes activeLineGlow {
+            0%, 100% { box-shadow: 0 0 8px -2px var(--accent-glow); }
+            50% { box-shadow: 0 0 12px 0px var(--accent-color); }
+        }
+        .CodeMirror-activeline-background {
+            background: linear-gradient(to right, rgba(0, 242, 234, 0.15) 0%, rgba(0, 242, 234, 0) 70%) !important;
+        }
+        .CodeMirror-activeline-gutter {
+            background: rgba(0, 242, 234, 0.1) !important;
+            border-right: 1px solid rgba(0, 242, 234, 0.2) !important;
+        }
+        .CodeMirror-activeline-background::before,
+        .CodeMirror-activeline-background::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            height: 100%;
+            width: 5px;
+            border-color: var(--accent-color);
+            border-style: solid;
+            animation: activeLineGlow 2s ease-in-out infinite;
+        }
+        .CodeMirror-activeline-background::before {
+            left: 4px;
+            border-width: 2px 0 2px 2px;
+            border-top-left-radius: 4px;
+            border-bottom-left-radius: 4px;
+        }
+        .CodeMirror-activeline-background::after {
+            right: 10px;
+            border-width: 2px 2px 2px 0;
+            border-top-right-radius: 4px;
+            border-bottom-right-radius: 4px;
+        }
+        /* --- END OF ACTIVE LINE STYLES --- */
+
+        /* --- Robust Fullscreen Editor Overlay --- */
+        #fullscreen-editor-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 2000;
+            background: rgba(2, 4, 10, 0.85); backdrop-filter: blur(8px);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.3s ease-in-out; pointer-events: none;
+        }
+        #fullscreen-editor-overlay.visible { opacity: 1; pointer-events: auto; }
+        #fullscreen-editor-container { width: 95vw; height: 95vh; transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.2, 1, 0.3, 1); }
+        #fullscreen-editor-overlay.visible #fullscreen-editor-container { transform: scale(1); }
+        #fullscreen-editor-content { flex-grow: 1; overflow: hidden; padding: 0; display: flex; }
+        #fullscreen-editor-content .CodeMirror { border-radius: 0 0 8px 8px; }
+
+        /* Other styles */
+        #fileTreeGH li:hover { background-color: rgba(60, 80, 150, 0.2); cursor: pointer; }
+        #fileTreeGH li.active-file { background-color: rgba(60, 80, 150, 0.4); color: var(--accent-color); }
+        #output-pane #hostedSiteFrameGH { width: 100%; height: 100%; border: none; background: #fff; }
+        body.output-fullscreen-mode #sidebar, body.output-fullscreen-mode #editor-pane, body.output-fullscreen-mode .resizer, body.output-fullscreen-mode #header-bar { display: none; }
+        body.output-fullscreen-mode #output-pane { flex-basis: 100%; min-width: 100%; border-radius: 0; border: none; }
+    </style>
+</head>
+<body>
+    <div id="background-container"><div class="stars"></div><div class="stars2"></div></div>
+
+    <div id="header-bar">
+        <div class="logo">Void-IDE</div>
+        <div class="repo-input-group-gh"><input type="text" id="repoUrlGH" placeholder="owner/repo"><input type="text" id="branchNameGH" placeholder="branch"><button id="loadSiteBtnGH">Load</button></div>
+        <div id="loadingIndicatorGH" style="display:none; margin: 0 10px;">Loading...</div>
+        <div id="errorDisplayGH" class="error-message-gh" style="display:none; padding: 5px 10px; margin: 0 10px;"></div>
+        <div class="auth-section-gh"><div id="userReposListContainerGH" style="display:none;"><select id="userReposSelectGH"><option>Select Your Repo</option></select></div><span id="authStatusTextGH"></span><div id="patInputAreaGH" style="display:none;"><input type="password" id="patInputGH" placeholder="GitHub PAT"><button id="savePatBtnGH">Save</button></div><button id="usePatBtnGH">Use PAT</button><button id="logoutBtnGH" style="display:none;">Logout</button></div>
+    </div>
+
+    <div id="app-container">
+        <!-- Left Panel: File Tree -->
+        <div id="sidebar" class="panel"><div class="panel-header"><h3><span id="repoNameDisplayGH">File Explorer</span></h3></div><div class="breadcrumbs" id="breadcrumbsGH"></div><div class="panel-content" id="fileTreeGH"></div></div>
+        <div class="resizer" id="resizer-fs"></div>
+        <!-- Center Panel: Editor -->
+        <div id="editor-pane" class="panel"><div class="panel-header" id="editor-header"><h3><span id="fileNameDisplayGH"></span></h3>
+            <div class="actions" style="display: flex; align-items: center; gap: 8px;">
+                <button id="editFileBtnGH" style="display:none;">Edit</button>
+                <button id="cancelEditBtnGH" style="display:none;">Cancel</button>
+                <div id="commitUiContainerGH" style="display: none; align-items: center; gap: 8px;">
+                    <input type="text" id="commitMessageGH" placeholder="Update file..." style="width: 200px;">
+                    <button id="commitBtnGH">Commit</button>
+                </div>
+                <button id="runCodeBtnGH" style="display:none;" class="primary-action">Run</button>
+                <button id="saveFileLocalBtnGH" style="display:none;">Download</button>
+                <button id="maximizeEditorBtn" title="Maximize Editor">↗</button>
+            </div>
+        </div>
+        <div class="panel-content" id="editor-content-area">
+            <div id="editorPlaceholder" style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-secondary); font-style: italic;">Select a file to view its content.</div>
+            <pre id="rawCodeViewGH" style="display:none; flex-grow: 1; overflow: auto; padding: 0.5em;"><code class="hljs"></code></pre>
+            <textarea id="codeEditorTextareaGH" style="display:none;"></textarea>
+            <img id="rawImageContentGH" src="#" alt="Image content" style="display:none; max-width: 100%; max-height: 100%; object-fit: contain; margin: auto;">
+        </div>
+        </div>
+        <div class="resizer" id="resizer-eo"></div>
+        <!-- Right Panel: Output/Preview -->
+        <div id="output-pane" class="panel"><div class="panel-header"><h3>Output / Preview</h3><button id="maximizeOutputBtn" title="Maximize Output">↗</button></div><div class="panel-content"><div id="iframeStatusGH" style="padding: 15px;">Awaiting file selection...</div><iframe id="hostedSiteFrameGH" sandbox="allow-scripts allow-forms allow-popups allow-modals allow-top-navigation allow-same-origin" style="display:none;"></iframe><div id="judge0OutputContainerGH" style="display:none; height: 100%;"><pre id="judge0OutputConsoleGH" style="height: 100%; margin: 0; white-space: pre-wrap; word-wrap: break-word;"></pre></div></div></div>
+    </div>
+
+    <!-- Fullscreen Editor Overlay Structure -->
+    <div id="fullscreen-editor-overlay">
+        <div id="fullscreen-editor-container" class="panel">
+            <div class="panel-header">
+                <h3><span id="fullscreen-editor-filename"></span></h3>
+                <button id="minimize-editor-btn" title="Minimize Editor (Esc)">↘</button>
+            </div>
+            <div id="fullscreen-editor-content" class="panel-content">
+                <!-- CodeMirror will be moved here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- JS Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/htmlmixed/htmlmixed.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/css/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/clike/clike.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/matchbrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/closebrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/selection/active-line.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+    <script>
+        // The JavaScript remains unchanged from the previous version.
+        // All functionality including the active line highlight is still intact.
+        document.addEventListener('DOMContentLoaded', () => {
+            const editorContentArea = document.getElementById('editor-content-area');
+            const maximizeEditorBtn = document.getElementById('maximizeEditorBtn');
+            const fullscreenEditorOverlay = document.getElementById('fullscreen-editor-overlay');
+            const fullscreenEditorContent = document.getElementById('fullscreen-editor-content');
+            const fullscreenEditorFilename = document.getElementById('fullscreen-editor-filename');
+            const minimizeEditorBtn = document.getElementById('minimize-editor-btn');
+            const commitUiContainerGH = document.getElementById('commitUiContainerGH');
+            const commitMessageGH = document.getElementById('commitMessageGH');
+            const commitBtnGH = document.getElementById('commitBtnGH');
+            const repoUrlInputGH = document.getElementById('repoUrlGH');
+            const branchNameInputGH = document.getElementById('branchNameGH');
+            const loadSiteBtnGH = document.getElementById('loadSiteBtnGH');
+            const fileTreeUlGH = document.getElementById('fileTreeGH');
+            const breadcrumbsDivGH = document.getElementById('breadcrumbsGH');
+            const errorDisplayGH = document.getElementById('errorDisplayGH');
+            const loadingIndicatorGH = document.getElementById('loadingIndicatorGH');
+            const hostedSiteFrameGH = document.getElementById('hostedSiteFrameGH');
+            const iframeStatusGH = document.getElementById('iframeStatusGH');
+            const repoNameDisplayGH = document.getElementById('repoNameDisplayGH');
+            const fileNameDisplayGH = document.getElementById('fileNameDisplayGH');
+            const editorPlaceholder = document.getElementById('editorPlaceholder');
+            const rawCodeViewGH = document.getElementById('rawCodeViewGH');
+            const rawImageContentGH = document.getElementById('rawImageContentGH');
+            const codeEditorTextareaGH = document.getElementById('codeEditorTextareaGH');
+            let cmInstanceGH = null;
+            const editFileBtnGH = document.getElementById('editFileBtnGH');
+            const cancelEditBtnGH = document.getElementById('cancelEditBtnGH');
+            const runCodeBtnGH = document.getElementById('runCodeBtnGH');
+            const saveFileLocalBtnGH = document.getElementById('saveFileLocalBtnGH');
+            const authStatusTextGH = document.getElementById('authStatusTextGH');
+            const usePatBtnGH = document.getElementById('usePatBtnGH');
+            const logoutBtnGH = document.getElementById('logoutBtnGH');
+            const patInputAreaGH = document.getElementById('patInputAreaGH');
+            const patInputGH = document.getElementById('patInputGH');
+            const savePatBtnGH = document.getElementById('savePatBtnGH');
+            const userReposListContainerGH = document.getElementById('userReposListContainerGH');
+            const userReposSelectGH = document.getElementById('userReposSelectGH');
+            const judge0OutputContainerGH = document.getElementById('judge0OutputContainerGH');
+            const judge0OutputConsoleGH = document.getElementById('judge0OutputConsoleGH');
+            const maximizeOutputBtn = document.getElementById('maximizeOutputBtn');
+
+            function makeResizable(resizer) { let prevSibling, nextSibling; let isResizing = false; resizer.addEventListener('mousedown', (e) => { isResizing = true; prevSibling = resizer.previousElementSibling; nextSibling = resizer.nextElementSibling; e.preventDefault(); document.addEventListener('mousemove', handleMouseMove); document.addEventListener('mouseup', handleMouseUp); }); function handleMouseMove(e) { if (!isResizing) return; const containerRect = resizer.parentElement.getBoundingClientRect(); const prevSiblingRect = prevSibling.getBoundingClientRect(); const newPrevWidth = e.clientX - prevSiblingRect.left; const newNextWidth = containerRect.right - e.clientX; if (newPrevWidth > 200 && newNextWidth > 200) { const totalFlex = parseFloat(getComputedStyle(prevSibling).flexBasis) + parseFloat(getComputedStyle(nextSibling).flexBasis); const newPrevFlex = (newPrevWidth / (newPrevWidth + newNextWidth)) * totalFlex; const newNextFlex = (newNextWidth / (newPrevWidth + newNextWidth)) * totalFlex; prevSibling.style.flexBasis = `${newPrevFlex}%`; nextSibling.style.flexBasis = `${newNextFlex}%`; } if (cmInstanceGH) cmInstanceGH.refresh(); } function handleMouseUp() { isResizing = false; document.removeEventListener('mousemove', handleMouseMove); document.removeEventListener('mouseup', handleMouseUp); } }
+            document.querySelectorAll('.resizer').forEach(makeResizable);
+            maximizeOutputBtn.addEventListener('click', () => { const isFullscreen = document.body.classList.contains('output-fullscreen-mode'); document.body.classList.toggle('output-fullscreen-mode', !isFullscreen); maximizeOutputBtn.innerHTML = isFullscreen ? '↘' : '↗'; maximizeOutputBtn.title = isFullscreen ? 'Maximize Output' : 'Minimize Output'; });
+            
+            function showFullscreenEditor() { if (!cmInstanceGH) return; fullscreenEditorFilename.textContent = fileNameDisplayGH.textContent; fullscreenEditorContent.appendChild(cmInstanceGH.getWrapperElement()); fullscreenEditorOverlay.classList.add('visible'); setTimeout(() => { cmInstanceGH.refresh(); cmInstanceGH.focus(); }, 100); }
+            function hideFullscreenEditor() { editorContentArea.appendChild(cmInstanceGH.getWrapperElement()); fullscreenEditorOverlay.classList.remove('visible'); setTimeout(() => { cmInstanceGH.refresh(); }, 300); }
+            maximizeEditorBtn.addEventListener('click', showFullscreenEditor);
+            minimizeEditorBtn.addEventListener('click', hideFullscreenEditor);
+            document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && fullscreenEditorOverlay.classList.contains('visible')) { hideFullscreenEditor(); } });
+
+            async function commitFileToGitHub() {
+                if (!cmInstanceGH || !currentFileSha) { showErrorGH("Cannot commit: No file open for editing or file state is invalid."); return; }
+                const content = cmInstanceGH.getValue();
+                const message = commitMessageGH.value.trim() || `Update ${currentFilePath.split('/').pop()} via Void-IDE`;
+                commitBtnGH.textContent = 'Committing...'; commitBtnGH.disabled = true;
+                try {
+                    const b64content = btoa(unescape(encodeURIComponent(content)));
+                    const commitData = { message: message, content: b64content, sha: currentFileSha, branch: currentBranch };
+                    const result = await apiFetchGH(`${GITHUB_API_BASE}/repos/${currentOwner}/${currentRepo}/contents/${currentFilePath}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(commitData) });
+                    if (result && result.content && result.content.sha) {
+                        currentFileSha = result.content.sha;
+                        originalFileContentForEdit = content;
+                        commitMessageGH.value = '';
+                        cancelEditBtnGH.click();
+                        const codeElement = rawCodeViewGH.querySelector('code');
+                        codeElement.textContent = originalFileContentForEdit;
+                        hljs.highlightElement(codeElement);
+                        showSuccessGH('Commit successful!');
+                    } else { throw new Error("Commit failed. API did not return expected data."); }
+                } catch (error) { showErrorGH(`Commit failed: ${error.message}`); } finally { commitBtnGH.textContent = 'Commit'; commitBtnGH.disabled = false; }
+            }
+            commitBtnGH.addEventListener('click', commitFileToGitHub);
+            
+            const GITHUB_API_BASE = 'https://api.github.com';
+            const DEFAULT_INDEX_FILES = ['index.html', 'index.htm'];
+            const RAPIDAPI_KEY = "YOUR_RAPIDAPI_KEY";
+            const RAPIDAPI_HOST_JUDGE0 = "judge0-ce.p.rapidapi.com";
+            const COMPILER_API_ENDPOINT = `https://${RAPIDAPI_HOST_JUDGE0}/submissions?base64_encoded=false&wait=true`;
+            const judge0LanguageIdMap = { py: 92, java: 91, c: 75, cpp: 76, cs: 86, js: 93, php: 68, rb: 72, go: 95, kt: 78, swift: 83, sql: 82, sh: 73 };
+            let currentOwner = '', currentRepo = '', currentBranch = '', currentFilePath = '', currentFileSha = '';
+            let GITHUB_PAT = null, currentUser = null, currentFileIsBinary = false, originalFileContentForEdit = '';
+            
+            function updateAuthUIGH() { if (currentUser && currentUser.login) { authStatusTextGH.textContent = `Logged in as ${currentUser.login}.`; usePatBtnGH.style.display = 'none'; logoutBtnGH.style.display = 'inline-block'; patInputAreaGH.style.display = 'none'; userReposListContainerGH.style.display = 'block'; fetchAndDisplayUserReposGH(); } else { authStatusTextGH.textContent = `Not authenticated.`; usePatBtnGH.style.display = 'inline-block'; logoutBtnGH.style.display = 'none'; patInputAreaGH.style.display = 'none'; userReposListContainerGH.style.display = 'none'; } }
+            async function fetchAndDisplayUserReposGH() { const repos = await apiFetchGH(`${GITHUB_API_BASE}/user/repos?type=all&sort=updated&per_page=100`); if (repos && Array.isArray(repos)) { userReposSelectGH.innerHTML = '<option value="">Select a repository...</option>'; repos.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at)); repos.forEach(repo => { const option = document.createElement('option'); option.value = `${repo.full_name}|${repo.default_branch}`; option.textContent = repo.full_name + (repo.private ? ' (Private)' : ''); userReposSelectGH.appendChild(option); }); } }
+            userReposSelectGH.addEventListener('change', (e) => { const [fullName, branch] = e.target.value.split('|'); if (fullName) { repoUrlInputGH.value = fullName; branchNameInputGH.value = branch; loadSiteBtnGH.click(); } });
+            usePatBtnGH.addEventListener('click', () => { patInputAreaGH.style.display = patInputAreaGH.style.display === 'none' ? 'flex' : 'none'; });
+            savePatBtnGH.addEventListener('click', async () => { const pat = patInputGH.value.trim(); if (pat) { GITHUB_PAT = pat; localStorage.setItem('github_pat', pat); patInputGH.value = ''; patInputAreaGH.style.display = 'none'; await fetchGitHubUserGH(); } });
+            logoutBtnGH.addEventListener('click', () => { GITHUB_PAT = null; currentUser = null; localStorage.removeItem('github_pat'); updateAuthUIGH(); });
+            async function fetchGitHubUserGH() { if (!GITHUB_PAT) { currentUser = null; updateAuthUIGH(); return; } const userData = await apiFetchGH(`${GITHUB_API_BASE}/user`); if (userData && userData.login) { currentUser = userData; } else { showErrorGH("Invalid PAT or error fetching user data."); GITHUB_PAT = null; localStorage.removeItem('github_pat'); } updateAuthUIGH(); }
+            async function apiFetchGH(apiUrl, options = {}) { loadingIndicatorGH.style.display = 'inline'; errorDisplayGH.style.display = 'none'; const headers = { 'Accept': 'application/vnd.github.v3+json', ...options.headers }; if (GITHUB_PAT) { headers['Authorization'] = `token ${GITHUB_PAT}`; } try { const response = await fetch(apiUrl, { ...options, headers }); if (!response.ok) { let errorMsg = `API Error ${response.status}`; try { const errData = await response.json(); errorMsg += `: ${errData.message}`; } catch(e){} throw new Error(errorMsg); } return await response.json(); } catch (error) { showErrorGH(error.message); return null; } finally { loadingIndicatorGH.style.display = 'none'; } }
+            function setEditorContent(contentElement) { editorPlaceholder.style.display = 'none'; rawCodeViewGH.style.display = 'none'; rawImageContentGH.style.display = 'none'; if (cmInstanceGH) cmInstanceGH.getWrapperElement().style.display = 'none'; contentElement.style.display = contentElement === rawImageContentGH ? 'block' : 'flex'; }
+            async function displayFileContent(fileItem) { if (!fileItem) return; currentFilePath = fileItem.path; currentFileSha = fileItem.sha; fileNameDisplayGH.textContent = fileItem.name; editFileBtnGH.style.display = 'none'; cancelEditBtnGH.style.display = 'none'; commitUiContainerGH.style.display = 'none'; runCodeBtnGH.style.display = 'none'; saveFileLocalBtnGH.style.display = 'none'; currentFileIsBinary = /\.(gif|jpe?g|tiff?|png|webp|bmp|svg|ico|pdf|zip)$/i.test(fileItem.name); const fileData = (fileItem.content !== undefined) ? fileItem : await apiFetchGH(`${GITHUB_API_BASE}/repos/${currentOwner}/${currentRepo}/contents/${fileItem.path}?ref=${currentBranch}`); if (!fileData) return showErrorGH("Failed to fetch file content."); if (/\.(gif|jpe?g|png|webp|svg)$/i.test(fileData.name)) { rawImageContentGH.src = fileData.download_url; setEditorContent(rawImageContentGH); } else if (currentFileIsBinary) { editorPlaceholder.textContent = `Cannot display binary file: ${fileData.name}`; setEditorContent(editorPlaceholder); } else { originalFileContentForEdit = (fileData.content) ? atob(fileData.content) : "(Empty file)"; const codeElement = rawCodeViewGH.querySelector('code'); codeElement.textContent = originalFileContentForEdit; const langExt = fileData.name.split('.').pop().toLowerCase(); codeElement.className = `hljs language-${langExt}`; hljs.highlightElement(codeElement); setEditorContent(rawCodeViewGH); if (GITHUB_PAT) editFileBtnGH.style.display = 'inline-block'; const fileExtRun = fileData.name.split('.').pop().toLowerCase(); if (DEFAULT_INDEX_FILES.includes(fileData.name.toLowerCase())) { runCodeBtnGH.style.display = 'inline-block'; runCodeBtnGH.textContent = "Run Web Code";} else if (judge0LanguageIdMap[fileExtRun]) { runCodeBtnGH.style.display = 'inline-block'; runCodeBtnGH.textContent = `Run ${fileExtRun.toUpperCase()}`;} } highlightFileInTreeGH(fileData.path); }
+            
+            editFileBtnGH.addEventListener('click', () => { 
+                if (!cmInstanceGH) { 
+                    cmInstanceGH = CodeMirror.fromTextArea(codeEditorTextareaGH, { 
+                        theme: 'material-darker', 
+                        lineNumbers: true, 
+                        autoCloseBrackets: true, 
+                        matchBrackets: true, 
+                        styleActiveLine: true 
+                    }); 
+                } 
+                const lang = currentFilePath.split('.').pop().toLowerCase(); 
+                const modeMap = { js:'javascript', json:'javascript', html:'htmlmixed', css:'css', py:'python', java:'text/x-java', c:'text/x-csrc', cpp:'text/x-c++src' }; 
+                cmInstanceGH.setOption("mode", modeMap[lang] || 'plaintext'); 
+                cmInstanceGH.setValue(originalFileContentForEdit); 
+                setEditorContent(cmInstanceGH.getWrapperElement()); 
+                cmInstanceGH.refresh(); 
+                cmInstanceGH.focus(); 
+                editFileBtnGH.style.display = 'none'; 
+                cancelEditBtnGH.style.display = 'inline-block'; 
+                commitUiContainerGH.style.display = 'flex'; 
+                saveFileLocalBtnGH.style.display = 'inline-block'; 
+            });
+
+            cancelEditBtnGH.addEventListener('click', () => { setEditorContent(rawCodeViewGH); editFileBtnGH.style.display = 'inline-block'; cancelEditBtnGH.style.display = 'none'; commitUiContainerGH.style.display = 'none'; saveFileLocalBtnGH.style.display = 'none'; });
+            saveFileLocalBtnGH.addEventListener('click', () => { if (!cmInstanceGH) return; const blob = new Blob([cmInstanceGH.getValue()], {type: 'text/plain;charset=utf-8'}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = fileNameDisplayGH.textContent; a.click(); URL.revokeObjectURL(a.href); });
+            async function fetchAndProcessPathGH(owner, repo, branch, path) { currentOwner = owner; currentRepo = repo; currentBranch = branch; repoNameDisplayGH.textContent = `${owner}/${repo}`; updateHash(); const contentData = await apiFetchGH(`${GITHUB_API_BASE}/repos/${owner}/${repo}/contents/${path}?ref=${branch}`); if (!contentData) return; if (Array.isArray(contentData)) { renderFileTreeGH(contentData, path); renderBreadcrumbsGH(path); const indexFile = contentData.find(item => DEFAULT_INDEX_FILES.includes(item.name.toLowerCase())); if (indexFile) { await displayFileContent(indexFile); hostHtmlFileFromGitHub(indexFile.path); } } else if (contentData.type === 'file') { renderBreadcrumbsGH(path); await displayFileContent(contentData); if (isHtmlFileGH(contentData.name)) { hostHtmlFileFromGitHub(contentData.path); } } }
+            function renderFileTreeGH(items, basePath) { fileTreeUlGH.innerHTML = ''; items.sort((a,b) => (a.type === b.type) ? a.name.localeCompare(b.name) : (a.type === 'dir' ? -1 : 1)); if (basePath) { const parentPath = basePath.substring(0, basePath.lastIndexOf('/')) || ''; const upLi = document.createElement('li'); upLi.innerHTML = `.. (Up)`; upLi.addEventListener('click', () => fetchAndProcessPathGH(currentOwner, currentRepo, currentBranch, parentPath)); fileTreeUlGH.appendChild(upLi); } items.forEach(item => { const li = document.createElement('li'); li.innerHTML = item.name; li.dataset.path = item.path; li.addEventListener('click', () => fetchAndProcessPathGH(currentOwner, currentRepo, currentBranch, item.path)); fileTreeUlGH.appendChild(li); }); }
+            function highlightFileInTreeGH(filePath) { fileTreeUlGH.querySelectorAll('li').forEach(li => li.classList.toggle('active-file', li.dataset.path === filePath)); }
+            function renderBreadcrumbsGH(path) { breadcrumbsDivGH.innerHTML = ''; const parts = path.split('/').filter(Boolean); let currentPath = ''; parts.forEach((part, i) => { const a = document.createElement('a'); a.href = '#'; a.textContent = part; const pathOnClick = parts.slice(0, i + 1).join('/'); a.addEventListener('click', (e) => { e.preventDefault(); fetchAndProcessPathGH(currentOwner, currentRepo, currentBranch, pathOnClick); }); breadcrumbsDivGH.appendChild(a); breadcrumbsDivGH.append(' / '); });}
+            function hostHtmlFileFromGitHub(filePath) { iframeStatusGH.style.display = 'none'; hostedSiteFrameGH.style.display = 'block'; hostedSiteFrameGH.src = `https://raw.githack.com/${currentOwner}/${currentRepo}/${currentBranch}/${filePath}`; }
+            function isHtmlFileGH(fileName) { return fileName ? DEFAULT_INDEX_FILES.includes(fileName.toLowerCase()) : false; }
+            runCodeBtnGH.addEventListener('click', () => { const codeToRun = cmInstanceGH && cmInstanceGH.getWrapperElement().style.display !== 'none' ? cmInstanceGH.getValue() : originalFileContentForEdit; const fileExt = currentFilePath.split('.').pop().toLowerCase(); if (DEFAULT_INDEX_FILES.includes(currentFilePath.split('/').pop().toLowerCase())) { iframeStatusGH.style.display = 'none'; hostedSiteFrameGH.style.display = 'block'; hostedSiteFrameGH.srcdoc = codeToRun; } else if (judge0LanguageIdMap[fileExt]) { executeWithJudge0GH(codeToRun, judge0LanguageIdMap[fileExt]); } });
+            async function executeWithJudge0GH(sourceCode, languageId) { judge0OutputContainerGH.style.display = 'block'; judge0OutputConsoleGH.textContent = 'Executing...'; hostedSiteFrameGH.style.display = 'none'; iframeStatusGH.style.display = 'none'; try { const response = await fetch(COMPILER_API_ENDPOINT, { method: 'POST', headers: { 'content-type': 'application/json', 'X-RapidAPI-Key': RAPIDAPI_KEY, 'X-RapidAPI-Host': RAPIDAPI_HOST_JUDGE0 }, body: JSON.stringify({ language_id: languageId, source_code: sourceCode }) }); const result = await response.json(); let outputText = `Status: ${result.status?.description}\nTime: ${result.time}s\n\n`; outputText += result.stdout ? `--- OUTPUT ---\n${result.stdout}` : ''; outputText += result.stderr ? `--- ERROR ---\n${result.stderr}` : ''; judge0OutputConsoleGH.textContent = outputText; } catch(e) { showErrorGH("Failed to connect to execution API."); } }
+            function showSuccessGH(message) { errorDisplayGH.textContent = message; errorDisplayGH.style.color = 'var(--accent-color)'; errorDisplayGH.style.display = 'inline'; setTimeout(() => { errorDisplayGH.style.display = 'none'; errorDisplayGH.style.color = 'var(--error-color)'; }, 4000); }
+            function showErrorGH(message) { errorDisplayGH.textContent = message; errorDisplayGH.style.color = 'var(--error-color)'; errorDisplayGH.style.display = 'inline'; setTimeout(() => errorDisplayGH.style.display = 'none', 5000); }
+            function updateHash() { if (currentOwner) location.hash = `${currentOwner}/${currentRepo}/${currentBranch}/${currentFilePath || ''}`; }
+            function loadFromHash() { const hash = location.hash.substring(1); if (!hash) return; const [owner, repo, branch, ...pathParts] = hash.split('/'); if (owner && repo && branch) { repoUrlInputGH.value = `${owner}/${repo}`; branchNameInputGH.value = branch; fetchAndProcessPathGH(owner, repo, branch, pathParts.join('/')); } }
+            loadSiteBtnGH.addEventListener('click', () => { const [owner, repo] = repoUrlInputGH.value.split('/'); const branch = branchNameInputGH.value.trim() || 'main'; if (owner && repo) { fetchAndProcessPathGH(owner, repo, branch, ''); } else { showErrorGH("Invalid repo format. Use 'owner/repo'."); } });
+            async function initializeApp() { const pat = localStorage.getItem('github_pat'); if (pat) { GITHUB_PAT = pat; await fetchGitHubUserGH(); } else { updateAuthUIGH(); } if (location.hash) { loadFromHash(); } }
+            initializeApp();
+        });
+    </script>
+</body>
+</html>

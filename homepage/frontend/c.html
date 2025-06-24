@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>O4D AI CodeLab (Final)</title>
+    <!-- CodeMirror Core CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <!-- CodeMirror Theme CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/material-darker.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/eclipse.min.css">
+    <!-- CodeMirror Addon CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/show-hint.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/dialog/dialog.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/lint/lint.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/foldgutter.css">
+    <link rel="icon" type="image/x-icon" href="https://o4dhome.odoo.com/web/image/website/1/logo/o4dhome?unique=8aacd3c">
+    <style>
+:root {
+    --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Ubuntu", sans-serif;
+    /* Dark Theme (Default) */
+    --bg-main: #1e1e1e; --bg-activity-bar: #2c2c2c; --bg-editor: #1e1e1e;
+    --bg-panel: #252526; --bg-panel-header: #333333; --bg-status-bar: #007acc;
+    --text-primary: #cccccc; --text-secondary: #999999; --text-bright: #ffffff;
+    --border-color: #3c3c3c; --accent-color: #0e83cd; --accent-hover: #15a1f1;
+    --activity-bar-shadow: rgba(0,0,0,0.5); --activity-button-active-bg: rgba(0,0,0,0.3);
+    --button-shadow: #222;
+    --menu-bg: #2a2a2b; --menu-hover-bg: #3c3c3c;
+    --chat-bg: #252526; --chat-header-bg: #333333; --chat-input-bg: #3c3c3c;
+    --chat-user-msg-bg: #094771; --chat-ai-msg-bg: #3a3a3a; --chat-code-bg: rgba(0,0,0,0.2);
+    --ghost-text-color: #5a5a5a;
+}
+.light-theme {
+    --bg-main: #f5f5f5; --bg-activity-bar: #e3e3e3; --bg-editor: #ffffff;
+    --bg-panel: #f3f3f3; --bg-panel-header: #eeeeee; --bg-status-bar: #007acc;
+    --text-primary: #1e1e1e; --text-secondary: #555555; --text-bright: #000000;
+    --border-color: #dcdcdc; --accent-color: #007acc; --accent-hover: #005a9e;
+    --activity-bar-shadow: rgba(0,0,0,0.1); --activity-button-active-bg: rgba(0,0,0,0.1);
+    --button-shadow: #bbb;
+    --menu-bg: #fdfdff; --menu-hover-bg: #f0f0f0;
+    --chat-bg: #fdfdff; --chat-header-bg: #f0f0f0; --chat-input-bg: #e9e9e9;
+    --chat-user-msg-bg: #cfe9fc; --chat-ai-msg-bg: #f0f0f0; --chat-code-bg: rgba(0,0,0,0.05);
+    --ghost-text-color: #b0b0b0;
+}
+html, body { height: 100%; margin: 0; font-family: var(--font-family); background-color: var(--bg-main); color: var(--text-primary); overflow: hidden; user-select: none; }
+.ide-container { display: flex; height: 100vh; width: 100vw; }
+
+#activity-bar {
+    width: 50px; background-color: var(--bg-activity-bar); display: flex; flex-direction: column; align-items: center;
+    padding: 10px 0; gap: 5px; flex-shrink: 0; z-index: 100; box-shadow: 2px 0 5px var(--activity-bar-shadow);
+}
+.activity-button {
+    background: none; border: none; color: var(--text-secondary); font-size: 24px; cursor: pointer;
+    padding: 10px; width: 100%; transition: all 0.2s ease; position: relative;
+    border-left: 3px solid transparent; text-shadow: 0 2px 3px var(--button-shadow);
+}
+.activity-button:hover { background-color: var(--activity-button-active-bg); }
+.activity-button:active { transform: translateY(1px); text-shadow: 0 1px 1px var(--button-shadow); }
+.activity-button.active { color: var(--text-bright); border-left-color: var(--accent-color); background-color: var(--activity-button-active-bg); }
+
+.main-view { flex-grow: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+#editor-container { flex-grow: 1; position: relative; display: flex; flex-direction: column; min-height: 0; }
+.playground-area, #main-code-editor-wrapper { display: none; flex: 1; overflow: auto; }
+.playground-area.active, #main-code-editor-wrapper.active { display: flex; }
+
+#web-playground { flex-direction: column; }
+.web-editor-row { display: flex; flex: 1; min-height: 50%; }
+.web-editor-pane { position: relative; display: flex; flex-direction: column; flex: 1; overflow: hidden; border: 1px solid var(--border-color); }
+.web-editor-pane .editor-header { padding: 4px 10px; font-size: 12px; background-color: var(--bg-panel-header); color: var(--text-secondary); border-bottom: 1px solid var(--border-color); }
+.web-resizer { background-color: var(--border-color); }
+.web-resizer.horizontal { cursor: row-resize; height: 5px; }
+.web-resizer.vertical { cursor: col-resize; width: 5px; }
+.CodeMirror { height: 100% !important; font-size: 15px; }
+
+#bottom-panel { height: 200px; background-color: var(--bg-panel); display: flex; flex-direction: column; flex-shrink: 0; border-top: 1px solid var(--border-color); }
+#panel-resizer { height: 5px; background-color: var(--border-color); cursor: row-resize; }
+#panel-header { display: flex; align-items: center; background-color: var(--bg-panel-header); padding: 0 10px; border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
+.panel-tab { background: none; border: none; color: var(--text-secondary); padding: 8px 15px; cursor: pointer; border-bottom: 2px solid transparent; border-top: 2px solid transparent; transition: all 0.2s ease; }
+.panel-tab:hover { color: var(--text-primary); }
+.panel-tab.active { color: var(--text-bright); border-bottom-color: var(--accent-color); background-color: var(--bg-editor); }
+#panel-content { flex-grow: 1; overflow: hidden; position: relative; }
+.panel-pane { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow-y: auto; background-color: var(--bg-editor); visibility: hidden; opacity: 0; transition: opacity 0.2s; }
+.panel-pane.active { visibility: visible; opacity: 1; }
+.panel-pane pre, .panel-pane textarea { box-sizing: border-box; width: 100%; height: 100%; border: none; background: none; color: inherit; font-family: 'Courier New', monospace; font-size: 14px; white-space: pre-wrap; word-wrap: break-word; outline: none; resize: none; padding: 10px; }
+#web-output-frame { width: 100%; height: 100%; border: none; background-color: #fff; }
+
+#status-bar { height: 25px; background-color: var(--bg-status-bar); color: white; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; font-size: 12px; flex-shrink: 0; }
+#status-left, #status-right { display: flex; align-items: center; gap: 15px; }
+.status-bar-button { background: none; border: none; color: white; cursor: pointer; height: 100%; padding: 0 10px; transition: background-color 0.2s; }
+.status-bar-button:hover { background-color: rgba(255,255,255,0.1); }
+.status-bar-button:active { background-color: rgba(255,255,255,0.2); }
+
+#language-menu { display: none; position: fixed; bottom: 25px; right: 150px; background-color: var(--menu-bg); border: 1px solid var(--border-color); border-radius: 4px; box-shadow: 0 -5px 15px rgba(0,0,0,0.2); z-index: 3000; max-height: 50vh; overflow-y: auto; }
+.language-menu-item { display: block; width: 100%; background: none; border: none; color: var(--text-primary); padding: 8px 20px; text-align: left; cursor: pointer; }
+.language-menu-item:hover { background-color: var(--menu-hover-bg); }
+
+#ghost-text-container { position: absolute; color: var(--ghost-text-color); font-family: 'Courier New', monospace; font-size: 15px; white-space: pre; pointer-events: none; z-index: 10; line-height: 1.45; opacity: 0; }
+
+/* AI Chat UI */
+#ai-chat-container { display: contents; }
+#chat-resizer { width: 5px; background-color: var(--border-color); cursor: col-resize; display: none; }
+#ai-chat-widget { transition: all 0.3s ease-out; border: 1px solid var(--border-color); }
+#ai-chat-widget.floating { position: fixed; bottom: 40px; right: 20px; width: 400px; max-height: 60vh; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 2000; display: flex; flex-direction: column; transform: scale(0.95); opacity: 0; pointer-events: none; }
+#ai-chat-widget.floating.visible { transform: scale(1); opacity: 1; pointer-events: auto; }
+#ai-chat-widget.docked { position: relative; width: 40%; max-width: 600px; min-width: 300px; height: 100%; display: flex; flex-direction: column; border-left: 1px solid var(--border-color); border-top: none; }
+#chat-header { background-color: var(--chat-header-bg); color: var(--text-primary); padding: 5px 10px; display: flex; justify-content: space-between; align-items: center; cursor: grab; border-bottom: 1px solid var(--border-color); }
+.chat-header-controls { display: flex; gap: 5px; }
+.chat-header-btn { background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 18px; padding: 5px; }
+.chat-header-btn:hover { color: var(--text-bright); }
+#chat-messages { flex-grow: 1; padding: 10px; overflow-y: auto; }
+.chat-message { display: flex; margin-bottom: 12px; max-width: 100%; }
+.chat-message.user { justify-content: flex-end; margin-left: auto; }
+.chat-message.ai { justify-content: flex-start; margin-right: auto; }
+.chat-avatar { width: 30px; height: 30px; border-radius: 50%; background-color: var(--chat-header-bg); color: var(--text-bright); display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; }
+.chat-message.user .chat-avatar { background-color: var(--chat-user-msg-bg); margin-left: 10px; }
+.chat-message.ai .chat-avatar { background-color: var(--chat-ai-msg-bg); margin-right: 10px; }
+.chat-bubble { padding: 10px 14px; border-radius: 12px; max-width: calc(100% - 50px); }
+.chat-message.user .chat-bubble { background-color: var(--chat-user-msg-bg); }
+.chat-message.ai .chat-bubble { background-color: var(--chat-ai-msg-bg); }
+.chat-bubble .CodeMirror { border: 1px solid var(--border-color); border-radius: 4px; margin-top: 8px; }
+.chat-bubble pre { position: relative; } /* Wrapper for button */
+.chat-insert-code-btn { position: absolute; top: 5px; right: 5px; background: #555; color: white; border: none; padding: 3px 8px; font-size: 10px; border-radius: 3px; cursor: pointer; opacity: 0; transition: opacity 0.2s; z-index: 10; }
+.chat-bubble .CodeMirror:hover .chat-insert-code-btn, .chat-bubble pre:hover .chat-insert-code-btn { opacity: 1; }
+.chat-bubble p:last-child { margin-bottom: 0; }
+#chat-input-form { display: flex; padding: 10px; border-top: 1px solid var(--border-color); align-items: center; }
+#chat-input { flex-grow: 1; border: none; background-color: var(--chat-input-bg); color: var(--text-primary); padding: 10px; border-radius: 5px; outline: none; resize: none; }
+#chat-send-btn { background: none; border: none; font-size: 20px; color: var(--accent-color); cursor: pointer; padding: 5px 10px; }
+    </style>
+</head>
+<body>
+    <div class="ide-container">
+        <div id="activity-bar">
+            <button class="activity-button" data-view="web" title="Web Development">🌐</button>
+            <button class="activity-button" data-view="code" title="General Purpose Code">‹/›</button>
+            <div style="margin-top: auto; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 5px;">
+                <button class="activity-button" id="run-code-activity" title="Run Code (Ctrl+Enter)">▶️</button>
+                <button class="activity-button" id="save-file-btn" title="Save to File">💾</button>
+                <button class="activity-button" id="ai-chat-toggle-btn" title="AI Assistant">🤖</button>
+                <button class="activity-button" id="fullscreen-btn" title="Toggle Fullscreen">⛶</button>
+                <button class="activity-button" id="theme-toggle-button" title="Toggle Theme">☀️</button>
+            </div>
+        </div>
+
+        <div class="main-view">
+            <div id="editor-container">
+                <div id="web-playground" class="playground-area">
+                    <div class="web-editor-row" id="web-top-row">
+                        <div class="web-editor-pane" id="html-pane"><div class="editor-header">HTML</div><textarea id="html-editor"></textarea></div>
+                        <div class="web-resizer vertical" id="resizer-v"></div>
+                        <div class="web-editor-pane" id="css-pane"><div class="editor-header">CSS</div><textarea id="css-editor"></textarea></div>
+                    </div>
+                    <div class="web-resizer horizontal" id="resizer-h"></div>
+                    <div class="web-editor-row" id="web-bottom-row">
+                        <div class="web-editor-pane" id="js-pane"><div class="editor-header">JavaScript</div><textarea id="js-editor"></textarea></div>
+                    </div>
+                </div>
+                <div id="main-code-editor-wrapper"><textarea id="main-code-editor"></textarea></div>
+                <div id="ghost-text-container"></div>
+            </div>
+
+            <div id="bottom-panel">
+                <div id="panel-resizer"></div>
+                <div id="panel-header">
+                    <button class="panel-tab active" data-pane="output">OUTPUT</button>
+                    <button class="panel-tab" data-pane="stdin">STDIN</button>
+                    <button class="panel-tab" data-pane="ai_log">AI LOG</button>
+                </div>
+                <div id="panel-content">
+                    <div id="output-pane" class="panel-pane active"><iframe id="web-output-frame"></iframe><pre id="code-output-pre"></pre></div>
+                    <div id="stdin-pane" class="panel-pane"><textarea placeholder="Provide standard input for your code here..."></textarea></div>
+                    <div id="ai_log-pane" class="panel-pane"><pre>Press Ctrl+I in an editor to get an AI suggestion.</pre></div>
+                </div>
+            </div>
+
+            <div id="status-bar">
+                <div id="status-left"><span id="status-text">Ready</span></div>
+                <div id="status-right">
+                    <button id="language-selector-btn" class="status-bar-button">Web</button>
+                    <span id="cursor-pos">Ln 1, Col 1</span>
+                    <span><a href="https://o4d.com" target="_blank" style="color:white; text-decoration:none;">O4D CodeLab</a></span>
+                </div>
+            </div>
+        </div>
+
+        <div id="chat-resizer"></div>
+        <div id="ai-chat-widget" class="floating">
+            <div id="chat-header">
+                <h3>AI Assistant</h3>
+                <div class="chat-header-controls">
+                    <button id="chat-dock-btn" class="chat-header-btn" title="Dock Panel">❐</button>
+                    <button id="close-chat-btn" class="chat-header-btn" title="Close Panel">×</button>
+                </div>
+            </div>
+            <div id="chat-messages"></div>
+            <form id="chat-input-form"><input id="chat-input" placeholder="Ask about code..."/><button type="submit" id="chat-send-btn" title="Send">➤</button></form>
+        </div>
+        
+    </div>
+    
+    <div id="language-menu"></div>
+    
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/htmlmixed/htmlmixed.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/css/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/clike/clike.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/sql/sql.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/php/php.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/ruby/ruby.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/go/go.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/rust/rust.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/swift/swift.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/shell/shell.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/matchbrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/selection/active-line.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/closebrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/comment/comment.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/show-hint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/hint/anyword-hint.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/search/search.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/dialog/dialog.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/lint/lint.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/foldcode.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/foldgutter.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/brace-fold.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- API & CONFIGURATION ---
+    const GROQ_API_KEY = "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";
+    const JUDGE0_API_KEY = "30c2536bcemsh7265cefb7696eabp173da4jsncc263d17cb33";
+    const JUDGE0_HOST = "judge0-ce.p.rapidapi.com";
+    const JUDGE0_ENDPOINT = `https://${JUDGE0_HOST}/submissions?base64_encoded=false&wait=true`;
+    const GROQ_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
+
+    // --- DOM CACHE ---
+    const dom = { body: document.body, ideContainer: document.querySelector('.ide-container'), activityButtons: document.querySelectorAll('.activity-button[data-view]'), mainView: document.querySelector('.main-view'), mainEditorWrapper: document.getElementById('main-code-editor-wrapper'), webPlayground: document.getElementById('web-playground'), ghostText: document.getElementById('ghost-text-container'), panelTabs: document.querySelectorAll('.panel-tab'), panelPanes: document.querySelectorAll('.panel-pane'), panelResizer: document.getElementById('panel-resizer'), bottomPanel: document.getElementById('bottom-panel'), codeOutputPre: document.getElementById('code-output-pre'), webOutputFrame: document.getElementById('web-output-frame'), stdinPane: document.querySelector('#stdin-pane textarea'), aiLogPane: document.querySelector('#ai_log-pane pre'), statusText: document.getElementById('status-text'), cursorPos: document.getElementById('cursor-pos'), languageStatusBtn: document.getElementById('language-selector-btn'), languageMenu: document.getElementById('language-menu'), runCodeBtn: document.getElementById('run-code-activity'), themeToggleBtn: document.getElementById('theme-toggle-button'), saveFileBtn: document.getElementById('save-file-btn'), fullscreenBtn: document.getElementById('fullscreen-btn'), chatWidget: document.getElementById('ai-chat-widget'), chatResizer: document.getElementById('chat-resizer'), chatToggleBtn: document.getElementById('ai-chat-toggle-btn'), chatDockBtn: document.getElementById('chat-dock-btn'), closeChatBtn: document.getElementById('close-chat-btn'), chatMessages: document.getElementById('chat-messages'), chatInputForm: document.getElementById('chat-input-form'), chatInput: document.getElementById('chat-input'), };
+
+    // --- GLOBAL STATE ---
+    let editors = {}; let currentView = 'web'; let currentLanguage = 'web';
+    let lastFocusedEditor = null; let currentSuggestion = ''; let fetchSuggestionController = null;
+    let chatHistory = [{ role: "system", content: "You are an expert programmer AI assistant in a web IDE. Be concise, use markdown for code." }];
+    let codeCache = {};
+
+    // --- LANGUAGE CONFIGURATION ---
+    const languageKeywords = { python: ['False', 'None', 'True', 'and', 'as', 'assert', 'async', 'await', 'break', 'class', 'continue', 'def', 'del', 'elif', 'else', 'except', 'finally', 'for', 'from', 'global', 'if', 'import', 'in', 'is', 'lambda', 'nonlocal', 'not', 'or', 'pass', 'raise', 'return', 'try', 'while', 'with', 'yield', 'print', 'input', 'range', 'len', 'str', 'int', 'float', 'list', 'dict', 'set', 'tuple', 'open', 'self'], java: ['abstract', 'assert', 'boolean', 'break', 'byte', 'case', 'catch', 'char', 'class', 'const', 'continue', 'default', 'do', 'double', 'else', 'enum', 'extends', 'final', 'finally', 'float', 'for', 'goto', 'if', 'implements', 'import', 'instanceof', 'int', 'interface', 'long', 'native', 'new', 'package', 'private', 'protected', 'public', 'return', 'short', 'static', 'strictfp', 'super', 'switch', 'synchronized', 'this', 'throw', 'throws', 'transient', 'try', 'void', 'volatile', 'while', 'String', 'System', 'out', 'println', 'Scanner', 'ArrayList', 'HashMap', 'Integer', 'Double', 'Boolean', 'Character', 'Exception', 'Object', 'main'], c: ['auto', 'break', 'case', 'char', 'const', 'continue', 'default', 'do', 'double', 'else', 'enum', 'extern', 'float', 'for', 'goto', 'if', 'int', 'long', 'register', 'return', 'short', 'signed', 'sizeof', 'static', 'struct', 'switch', 'typedef', 'union', 'unsigned', 'void', 'volatile', 'while', '#include', '#define', 'printf', 'scanf', 'malloc', 'free', 'strcpy', 'strcmp', 'strlen', 'fprintf', 'fscanf', 'FILE', 'NULL', 'main'], cpp: ['asm', 'auto', 'bool', 'break', 'case', 'catch', 'char', 'class', 'const', 'const_cast', 'continue', 'default', 'delete', 'do', 'double', 'dynamic_cast', 'else', 'enum', 'explicit', 'export', 'extern', 'false', 'float', 'for', 'friend', 'goto', 'if', 'inline', 'int', 'long', 'mutable', 'namespace', 'new', 'operator', 'private', 'protected', 'public', 'register', 'reinterpret_cast', 'return', 'short', 'signed', 'sizeof', 'static', 'static_cast', 'struct', 'switch', 'template', 'this', 'throw', 'true', 'try', 'typedef', 'typeid', 'typename', 'union', 'unsigned', 'using', 'virtual', 'void', 'volatile', 'wchar_t', 'while', '#include', '#define', 'std', 'cout', 'cin', 'endl', 'string', 'vector', 'map', 'set', 'iostream', 'fstream', 'sstream', 'algorithm', 'nullptr', 'main'] };
+    const langConfig = {
+        web: { name: 'Web', isMultiFile: true },
+        php: { id: 71, name: 'PHP', mode: 'application/x-httpd-php', detection: code => /<\?php/.test(code) },
+        ruby: { id: 72, name: 'Ruby', mode: 'text/x-ruby', detection: code => /\b(def|end|puts|require)\b/.test(code) && !code.includes('function') },
+        rust: { id: 73, name: 'Rust', mode: 'text/x-rustsrc', detection: code => /\bfn\s+main\b|\b(let\s+mut|use\s+std|impl|trait)\b/.test(code) },
+        go: { id: 95, name: 'Go', mode: 'text/go', detection: code => /\b(package|func|import|fmt)\b/.test(code) },
+        swift: { id: 83, name: 'Swift', mode: 'text/x-swift', detection: code => /\b(import\s+UIKit|var|let|func|class|struct)\b/.test(code) },
+        kotlin: { id: 78, name: 'Kotlin', mode: 'text/x-kotlin', detection: code => /\b(fun|val|var|package|import)\b/.test(code) && !code.includes('function') },
+        csharp: { id: 51, name: 'C#', mode: 'text/x-csharp', detection: code => /\b(using|namespace|class|static\s+void\s+Main)\b/.test(code) },
+        java: { id: 91, name: 'Java', mode: 'text/x-java', detection: code => /\b(public\s+class|System\.out\.println|import\s+java)\b/.test(code) },
+        cpp: { id: 76, name: 'C++', mode: 'text/x-c++src', detection: code => /#include\s*<iostream>|std::cout/.test(code) },
+        c: { id: 75, name: 'C', mode: 'text/x-csrc', detection: code => /#include\s*<stdio\.h>/.test(code) },
+        python: { id: 92, name: 'Python', mode: 'python', detection: code => /\b(def|import|print|for|if|else|elif)\b/.test(code) },
+        bash: { id: 46, name: 'Bash', mode: 'text/x-sh', detection: code => /^#!.*\/bin\/(bash|sh)|echo\s|fi\b/.test(code) },
+        mysql: { id: 82, name: 'MySQL', mode: 'text/x-mysql', detection: code => /\b(SELECT|CREATE\s+TABLE|INSERT\s+INTO|UPDATE|DELETE\s+FROM)\b/i.test(code) },
+    };
+    
+    // --- INITIALIZATION ---
+    function init() { initTheme(); initEditors(); initLayout(); initAI(); switchView('web'); }
+    function initTheme() { dom.themeToggleBtn.addEventListener('click', () => applyTheme(!dom.body.classList.contains('light-theme'))); applyTheme(localStorage.getItem('ideTheme') === 'light'); }
+    function applyTheme(isLight) { dom.body.classList.toggle('light-theme', isLight); dom.themeToggleBtn.textContent = isLight ? '🌙' : '☀️'; Object.values(editors).forEach(e => e?.setOption('theme', isLight ? 'eclipse' : 'material-darker')); localStorage.setItem('ideTheme', isLight ? 'light' : 'dark'); }
+
+    // --- LAYOUT & UI ---
+    function initLayout() {
+        dom.activityButtons.forEach(btn => btn.addEventListener('click', () => switchView(btn.dataset.view)));
+        dom.runCodeBtn.addEventListener('click', runCode);
+        dom.saveFileBtn.addEventListener('click', saveToFile);
+        dom.panelTabs.forEach(tab => tab.addEventListener('click', () => switchPanelPane(tab.dataset.pane)));
+        dom.fullscreenBtn.addEventListener('click', toggleNativeFullscreen);
+        dom.panelResizer.addEventListener('mousedown', e => { e.preventDefault(); document.addEventListener('mousemove', resizePanel); document.addEventListener('mouseup', () => document.removeEventListener('mousemove', resizePanel), { once: true }); });
+        const resizePanel = e => { const newH = window.innerHeight - e.clientY; if (newH > 50 && newH < window.innerHeight-100) dom.bottomPanel.style.height = `${newH}px`; };
+        initLanguageMenu();
+    }
+
+    // --- EDITORS ---
+    function initEditors() {
+        const createEditor = (id, mode, value = '') => {
+            const editor = CodeMirror.fromTextArea(document.getElementById(id), { lineNumbers: true, theme: 'material-darker', autoCloseBrackets: true, matchBrackets: true, styleActiveLine: true, gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"], foldGutter: true, extraKeys: { "Ctrl-F": "findPersistent", "Shift-Ctrl-F": "replace", "Ctrl-/": "toggleComment", "Ctrl-I": getAISuggestion, "Ctrl-Enter": runCode, "Tab": acceptSuggestionOrTab }});
+            editor.setOption("mode", mode); editor.setValue(value);
+            editor.on('cursorActivity', cm => { hideGhostText(); updateCursorStatus(cm); });
+            editor.on('focus', () => { lastFocusedEditor = editor; });
+            editor.on('inputRead', (cm) => { if(cm.state.completionActive) return; CodeMirror.commands.autocomplete(cm, null, { completeSingle: false }); });
+            return editor;
+        };
+        editors.html = createEditor('html-editor', 'htmlmixed', '<h1>Hello World!</h1>');
+        editors.css = createEditor('css-editor', 'css', 'body { font-family: sans-serif; }');
+        editors.js = createEditor('js-editor', 'javascript', 'console.log("Welcome!");');
+        editors.main = createEditor('main-code-editor', 'python', '');
+        [editors.html, editors.css, editors.js].forEach(e => e.on('change', debounce(runCode, 300)));
+        editors.main.on('change', debounce(handleMainEditorChange, 500));
+    }
+    
+    function getActiveEditor() { return currentView === 'web' ? (lastFocusedEditor || editors.html) : editors.main; }
+    function handleMainEditorChange() { setLanguage(detectLanguage(editors.main.getValue())); }
+    function detectLanguage(code) { if (code.trim() === '') return currentLanguage; for (const [k,c] of Object.entries(langConfig)) { if (c.detection && c.detection(code)) return k; } return currentLanguage; }
+    
+    // --- LANGUAGE MANAGEMENT ---
+    function initLanguageMenu() {
+        for (const [key, config] of Object.entries(langConfig)) { if (config.isMultiFile) continue; const item = document.createElement('button'); item.className = 'language-menu-item'; item.textContent = config.name; item.onclick = () => { setLanguage(key, false); dom.languageMenu.style.display = 'none'; }; dom.languageMenu.appendChild(item); }
+        dom.languageStatusBtn.addEventListener('click', (e) => { if(currentView === 'code') { e.stopPropagation(); dom.languageMenu.style.display = 'block'; }});
+        document.addEventListener('click', () => dom.languageMenu.style.display = 'none');
+    }
+
+    function setLanguage(langKey, loadFromCache = false) {
+        if (!langConfig[langKey] || (currentLanguage === langKey && !loadFromCache)) return;
+        if (currentView === 'code' && currentLanguage !== 'web') codeCache[currentLanguage] = editors.main.getValue();
+        currentLanguage = langKey;
+        const config = langConfig[langKey];
+        editors.main.setOption('mode', config.mode);
+        editors.main.setOption("hintOptions", { hint: getHinter(langKey) });
+        dom.languageStatusBtn.textContent = config.name;
+        if (loadFromCache) { editors.main.setValue(codeCache[langKey] || ''); }
+        editors.main.focus();
+    }
+    
+    function getHinter(langKey) {
+        return (cm) => {
+            const cursor = cm.getCursor(), token = cm.getTokenAt(cursor); const start = token.start, end = cursor.ch;
+            const currentWord = token.string.substring(0, end - start);
+            const list = (languageKeywords[langKey] || []).filter(k => k.toLowerCase().startsWith(currentWord.toLowerCase()));
+            const anyword = CodeMirror.hint.anyword(cm); if(anyword) list.push(...anyword.list);
+            return { list: [...new Set(list)].sort(), from: CodeMirror.Pos(cursor.line, start), to: CodeMirror.Pos(cursor.line, end) };
+        }
+    }
+
+    function switchView(view) {
+        if (view === currentView) return;
+        if (currentView === 'code') codeCache[currentLanguage] = editors.main.getValue();
+        currentView = view;
+        dom.activityButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.view === view));
+        dom.webPlayground.classList.toggle('active', view === 'web');
+        dom.mainEditorWrapper.classList.toggle('active', view === 'code');
+        if (view === 'web') {
+            currentLanguage = 'web'; dom.languageStatusBtn.textContent = "Web"; lastFocusedEditor = lastFocusedEditor || editors.html; lastFocusedEditor.focus(); runCode();
+        } else { const lastLang = Object.keys(codeCache).pop() || 'python'; setLanguage(lastLang, true); }
+        Object.values(editors).forEach(e => e?.refresh());
+        dom.statusText.textContent = `${view.charAt(0).toUpperCase() + view.slice(1)} Mode Ready.`;
+    }
+
+    function switchPanelPane(paneName) { dom.panelTabs.forEach(t => t.classList.toggle('active', t.dataset.pane === paneName)); dom.panelPanes.forEach(p => p.classList.toggle('active', p.id === `${paneName}-pane`)); }
+    function updateCursorStatus(cm) { const { line, ch } = cm.getCursor(); dom.cursorPos.textContent = `Ln ${line + 1}, Col ${ch + 1}`; }
+
+    // --- CODE EXECUTION ---
+    async function runCode() {
+        const lang = currentLanguage;
+        dom.webOutputFrame.style.display = lang === 'web' ? 'block' : 'none'; dom.codeOutputPre.style.display = lang === 'web' ? 'none' : 'block';
+        if (lang === 'web') { dom.webOutputFrame.srcdoc = `<style>${editors.css.getValue()}</style>${editors.html.getValue()}<script>${editors.js.getValue()}<\/script>`; return; }
+        if (!langConfig[lang]?.id) { dom.codeOutputPre.textContent = `Execution not supported for "${langConfig[lang]?.name || lang}".`; return; }
+        dom.runCodeBtn.style.color = 'var(--accent-hover)'; dom.statusText.textContent = `Executing ${langConfig[lang].name}...`;
+        switchPanelPane('output'); dom.codeOutputPre.textContent = `Executing...`;
+        try {
+            const response = await fetch(JUDGE0_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-RapidAPI-Key': JUDGE0_API_KEY, 'X-RapidAPI-Host': JUDGE0_HOST }, body: JSON.stringify({ language_id: langConfig[lang].id, source_code: editors.main.getValue(), stdin: dom.stdinPane.value }) });
+            const result = await response.json(); if (!response.ok) throw new Error(result.message || `API Error: ${response.status}`);
+            let output = `Status: ${result.status?.description} | Time: ${result.time || 0}s | Memory: ${(result.memory/1024 || 0).toFixed(2)} KB\n\n`;
+            if (result.stdout) output += `--- OUTPUT ---\n${result.stdout}`; if (result.stderr) output += `\n--- ERROR ---\n${result.stderr}`; if (result.compile_output) output += `\n--- COMPILE LOG ---\n${result.compile_output}`;
+            dom.codeOutputPre.textContent = output; dom.statusText.textContent = `Execution finished.`;
+        } catch (error) { dom.codeOutputPre.textContent = `--- EXECUTION FAILED ---\n${error.message}`; dom.statusText.textContent = `Execution failed.`; } finally { dom.runCodeBtn.style.color = ''; }
+    }
+
+    // --- AI INTEGRATION ---
+    function initAI() {
+        dom.chatToggleBtn.addEventListener('click', () => dom.chatWidget.classList.toggle('visible'));
+        dom.closeChatBtn.addEventListener('click', () => dom.chatWidget.classList.remove('visible'));
+        dom.chatDockBtn.addEventListener('click', toggleChatDock);
+        dom.chatInputForm.addEventListener('submit', handleChatSubmit);
+        dom.chatResizer.addEventListener('mousedown', (e) => { e.preventDefault(); document.addEventListener('mousemove', resizeChat); document.addEventListener('mouseup', () => document.removeEventListener('mousemove', resizeChat), { once: true }); });
+    }
+
+    function toggleChatDock() {
+        const isDocked = dom.chatWidget.classList.toggle('docked');
+        dom.chatWidget.classList.toggle('floating', !isDocked);
+        dom.chatResizer.style.display = isDocked ? 'block' : 'none';
+        if (isDocked) {
+            dom.ideContainer.appendChild(dom.chatResizer);
+            dom.ideContainer.appendChild(dom.chatWidget);
+            dom.chatDockBtn.textContent = '↗️'; dom.chatDockBtn.title = 'Undock Panel';
+        } else {
+            document.body.appendChild(dom.chatResizer);
+            document.body.appendChild(dom.chatWidget);
+            dom.chatDockBtn.textContent = '❐'; dom.chatDockBtn.title = 'Dock Panel';
+        }
+        Object.values(editors).forEach(e => e.refresh());
+    }
+
+    function resizeChat(e) {
+        const newWidth = window.innerWidth - e.clientX;
+        if (newWidth > 250 && newWidth < window.innerWidth - 300) { dom.chatWidget.style.width = `${newWidth}px`; Object.values(editors).forEach(ed => ed.refresh()); }
+    }
+
+    function getAISuggestion() { if (fetchSuggestionController) fetchSuggestionController.abort(); fetchSuggestionController = new AbortController(); fetchInlineSuggestion(fetchSuggestionController.signal); }
+    async function fetchInlineSuggestion(signal) {
+        const editor = getActiveEditor(); if (!editor || currentView === 'web') return;
+        dom.statusText.textContent = `🤖 Asking AI...`; hideGhostText();
+        const cursor = editor.getCursor(), code = editor.getValue(), offset = editor.indexFromPos(cursor);
+        const prompt = `You are a code completion AI. Provide a short, relevant completion for the code. Do not explain. Just provide the code.\n<CODE_BEFORE_CURSOR>\n${code.substring(0,offset)}\n<CODE_AFTER_CURSOR>\n${code.substring(offset)}\n<LANGUAGE>\n${currentLanguage}`;
+        try {
+            const response = await fetch(GROQ_ENDPOINT, { method: 'POST', headers: { 'Authorization': `Bearer ${GROQ_API_KEY}`, 'Content-Type': 'application/json' }, signal, body: JSON.stringify({ messages: [{ role: "system", content: prompt }], model: "llama3-8b-8192", max_tokens: 64, temperature: 0.2 }) });
+            if (!response.ok) throw new Error('API response not OK');
+            const result = await response.json(); const suggestion = result.choices[0]?.message?.content.trim();
+            if (suggestion && !editor.somethingSelected()) { currentSuggestion = suggestion; showGhostText(suggestion); dom.aiLogPane.textContent = `[Suggestion for ${currentLanguage}]:\n${suggestion}\n\n${dom.aiLogPane.textContent}`; }
+        } catch (error) { if (error.name !== 'AbortError') console.error("Suggestion error:", error); } finally { dom.statusText.textContent = `${currentView.toUpperCase()} Mode Ready.`; }
+    }
+    function showGhostText(text) { const editor = getActiveEditor(); if (!editor) return; const coords = editor.cursorCoords(true, 'local'); const container = editor.getWrapperElement(); dom.ghostText.textContent = text.split('\n')[0]; container.appendChild(dom.ghostText); dom.ghostText.style.top = `${coords.top}px`; dom.ghostText.style.left = `${coords.left}px`; dom.ghostText.style.opacity = '1'; }
+    function hideGhostText() { currentSuggestion = ''; dom.ghostText.style.opacity = '0'; }
+    function acceptSuggestionOrTab(cm) { if (currentSuggestion) { cm.replaceSelection(currentSuggestion); hideGhostText(); } else { cm.execCommand("defaultTab"); } }
+    
+    async function handleChatSubmit(e) {
+        e.preventDefault(); const userInput = dom.chatInput.value.trim();
+        if (!userInput || GROQ_API_KEY === "YOUR_GROQ_API_KEY_HERE") { addMessageToChat('ai', 'AI not configured. Add a Groq API key.'); return; }
+        addMessageToChat('user', userInput); chatHistory.push({ role: "user", content: userInput });
+        dom.chatInput.value = '';
+        const aiMessageBubble = addMessageToChat('ai', '...');
+        const contentDiv = aiMessageBubble.querySelector('.chat-bubble');
+        contentDiv.innerHTML = '<span class="typing-cursor"></span>';
+        try {
+            const response = await fetch(GROQ_ENDPOINT, { method: 'POST', headers: { 'Authorization': `Bearer ${GROQ_API_KEY}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: chatHistory, model: "llama3-8b-8192", stream: true }) });
+            if (!response.ok) throw new Error(`API Error: ${response.status} ${response.statusText}`);
+            const reader = response.body.getReader(); const decoder = new TextDecoder(); let fullResponse = "";
+            
+            while (true) {
+                const { value, done } = await reader.read(); if (done) break;
+                const chunk = decoder.decode(value, { stream: true });
+                const lines = chunk.split('\n').filter(line => line.trim() !== '');
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        const data = line.substring(6);
+                        if (data === '[DONE]') break;
+                        try {
+                            const parsed = JSON.parse(data);
+                            const content = parsed.choices[0]?.delta?.content;
+                            if (content) { fullResponse += content; contentDiv.innerHTML = marked.parse(fullResponse); }
+                        } catch (err) { /* Incomplete JSON chunk, wait for next */ }
+                    }
+                }
+                dom.chatMessages.scrollTop = dom.chatMessages.scrollHeight;
+            }
+            chatHistory.push({ role: "assistant", content: fullResponse });
+            renderCodeBlocksIn(contentDiv);
+        } catch (error) { contentDiv.innerHTML = `Sorry, an error occurred: ${error.message}`; }
+    }
+    
+    function addMessageToChat(sender, message) {
+        const msgEl = document.createElement('div');
+        msgEl.className = `chat-message ${sender}`;
+        const avatar = `<div class="chat-avatar">${sender === 'user' ? 'U' : 'AI'}</div>`;
+        const bubble = `<div class="chat-bubble">${marked.parse(message)}</div>`;
+        msgEl.innerHTML = sender === 'user' ? bubble + avatar : avatar + bubble;
+        dom.chatMessages.appendChild(msgEl);
+        if (sender === 'user') renderCodeBlocksIn(msgEl);
+        dom.chatMessages.scrollTop = dom.chatMessages.scrollHeight; return msgEl;
+    }
+
+    function renderCodeBlocksIn(element) {
+        element.querySelectorAll('pre code').forEach(block => {
+            const lang = block.className.replace('language-', '');
+            const code = block.textContent;
+            const pre = block.parentElement;
+            pre.innerHTML = ''; // Clear the pre
+            const editorInstance = CodeMirror(pre, { value: code, mode: langConfig[lang]?.mode || 'text/plain', theme: dom.body.classList.contains('light-theme') ? 'eclipse' : 'material-darker', readOnly: true, lineNumbers: true });
+            const insertBtn = document.createElement('button'); insertBtn.className = 'chat-insert-code-btn'; insertBtn.textContent = 'Insert';
+            insertBtn.onclick = () => getActiveEditor()?.replaceSelection(code);
+            editorInstance.getWrapperElement().appendChild(insertBtn);
+        });
+    }
+
+    // --- UTILITIES ---
+    function saveToFile() { const editor = getActiveEditor(); if (!editor) return; const lang = currentView === 'web' ? 'web' : currentLanguage; const ext = { web: ".html", python: '.py', java: '.java', c: '.c', cpp: '.cpp', mysql: '.sql', php: '.php', ruby: '.rb', rust: '.rs', go: '.go', swift: '.swift', kotlin: '.kt', csharp: '.cs', bash: '.sh' }[lang] || '.txt'; const content = lang === 'web' ? `HTML:\n${editors.html.getValue()}\n\nCSS:\n${editors.css.getValue()}\n\nJS:\n${editors.js.getValue()}` : editor.getValue(); const blob = new Blob([content], { type: 'text/plain;charset=utf-8' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `${lang}-O4D-snippet${ext}`; a.click(); URL.revokeObjectURL(a.href); }
+    function toggleNativeFullscreen() { if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(err => alert(`Fullscreen failed: ${err.message}`)); else document.exitFullscreen(); }
+    function debounce(func, delay) { let timeout; return (...args) => { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), delay); }; }
+
+    // --- START APPLICATION ---
+    init();
+});
+</script>
+</body>
+</html>

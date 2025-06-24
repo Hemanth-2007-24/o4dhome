@@ -5,69 +5,96 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - O4D</title>
+    <meta name="robots" content="noindex, nofollow">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="https://o4dhome.odoo.com/web/image/website/1/logo/o4dhome?unique=8aacd3c">
+    
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Shared styles from index.html for background and theme */
+        body { background: linear-gradient(180deg, #0d1117 0%, #161b22 100%); background-attachment: fixed; color: var(--text-color, #e0e0e0); }
+        body.light-theme { background: #f8f9fa; color: #212529; }
+        body.light-theme .top-navbar { background-color: #e9ecef; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        body.light-theme .logo, body.light-theme .nav-link { color: #343a40; }
+        body.light-theme .logo { color: #fd7e14; }
+        body.light-theme .theme-toggle-btn, body.light-theme .btn { color: #343a40; }
+        body.light-theme .card { background-color: #ffffff; border: 1px solid #dee2e6; }
+        body.light-theme h1, body.light-theme h2, body.light-theme h3, body.light-theme p { color: #212529; }
+        body.light-theme .section-title span { color: #fd7e14; }
+        
+        /* Admin Page Specific Styles */
+        .admin-table-container { padding: 1.5rem; overflow-x: auto; }
+        .user-table { width: 100%; border-collapse: collapse; white-space: nowrap; }
+        .user-table th, .user-table td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--card-border); }
+        .user-table th { font-weight: 600; color: var(--primary-color); }
+        body.light-theme .user-table th { color: #fd7e14; }
+        .user-table tbody tr { transition: background-color 0.3s ease; }
+        .user-table tbody tr:hover { background-color: rgba(255, 255, 255, 0.05); }
+        body.light-theme .user-table tbody tr:hover { background-color: #f1f3f5; }
+
+        .user-info { display: flex; align-items: center; gap: 15px; }
+        .user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+        .login-method { display: flex; align-items: center; gap: 8px; text-transform: capitalize; }
+        .login-method .fab, .login-method .fas { font-size: 1.2rem; }
+    </style>
 </head>
 <body>
-    <header class="top-navbar"><a href="index.html" class="logo">O4D Admin</a><div class="header-controls"><button id="logout-btn" class="btn">Logout</button></div></header>
-    <main class="page-container" style="padding-top: 5rem;">
-        <h1 class="section-title">User <span>Database</span></h1>
-        <div class="card data-table-container">
-            <table class="data-table">
-                <thead><tr><th>Name</th><th>Email</th><th>Login Method</th><th>Joined On</th><th>Bio</th></tr></thead>
-                <tbody id="user-table-body"><tr><td colspan="5" style="text-align:center;">Loading...</td></tr></tbody>
-            </table>
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline"></div>
+
+    <header class="top-navbar">
+        <a href="index.html" class="logo">O4D Admin</a>
+        <div class="header-controls">
+            <button id="logout-btn" class="btn">Logout</button>
+            <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Theme"><i class="fas fa-moon"></i></button>
         </div>
+    </header>
+
+    <main class="page-container" style="padding-top: 5rem;">
+        <section class="section is-visible">
+            <h1 class="section-title">User <span>Database</span></h1>
+            <div class="card">
+                <div class="admin-table-container">
+                    <table class="user-table">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Email</th>
+                                <th>Login Method</th>
+                                <th>Joined On</th>
+                                <th>Last Seen</th> <!-- NEW: Last Seen Column -->
+                            </tr>
+                        </thead>
+                        <tbody id="user-table-body">
+                            <!-- User rows will be injected here by JavaScript -->
+                            <tr><td colspan="5" style="text-align:center; padding: 3rem;">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
     </main>
+
     <div class="toast-notification"></div>
+
     <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const API_BASE_URL = ''; // Use relative path
+        const API_BASE_URL = '';
         const ADMIN_EMAIL = "info.open4discuss@gmail.com";
         const currentUser = JSON.parse(localStorage.getItem('currentUser'));
 
+        // Auth Guard
         if (!currentUser || currentUser.email !== ADMIN_EMAIL) {
             window.location.replace('index.html');
             return;
         }
 
         const userTableBody = document.getElementById('user-table-body');
-
-        async function loadUsers() {
-            try {
-                const response = await fetch(`${API_BASE_URL}/api/users`, {
-                    headers: { 'X-User-Email': currentUser.email } // Authentication header
-                });
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.message || 'Could not fetch users.');
-                }
-                
-                userTableBody.innerHTML = '';
-                if (data.length === 0) {
-                    userTableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;">No other users have registered yet.</td></tr>`;
-                    return;
-                }
-
-                data.forEach(user => {
-                    const joinDate = new Date(user.createdAt).toLocaleDateString();
-                    const loginMethod = user.loginMethod || 'manual';
-                    const icon = loginMethod.includes('facebook') ? 'facebook-f' : (loginMethod === 'manual' ? 'envelope' : loginMethod);
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${user.name || 'N/A'}</td>
-                        <td>${user.email}</td>
-                        <td><i class="fab fa-${icon}"></i> ${loginMethod.charAt(0).toUpperCase() + loginMethod.slice(1)}</td>
-                        <td>${joinDate}</td>
-                        <td>${user.bio || ''}</td>
-                    `;
-                    userTableBody.appendChild(row);
-                });
-            } catch (error) {
-                userTableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color: var(--error-color);">${error.message}</td></tr>`;
-            }
-        }
+        
+        initUI();
+        loadUsers();
 
         document.getElementById('logout-btn').addEventListener('click', () => {
             localStorage.removeItem('currentUser');
@@ -75,9 +102,116 @@
             setTimeout(() => { window.location.replace('index.html'); }, 1000);
         });
 
-        function showToast(message, type = 'success') { const t = document.querySelector('.toast-notification'); t.textContent = message; t.className = `toast-notification ${type} show`; setTimeout(() => { t.classList.remove('show'); }, 4000); }
+        async function loadUsers() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/users`, {
+                    headers: { 'X-User-Email': currentUser.email }
+                });
+                const users = await response.json();
 
-        loadUsers();
+                if (!response.ok) throw new Error(users.message || 'Could not fetch users.');
+                
+                userTableBody.innerHTML = ''; 
+                if (users.length === 0) {
+                    userTableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 3rem;">No other users found.</td></tr>`;
+                    return;
+                }
+
+                users.forEach(user => {
+                    const row = document.createElement('tr');
+                    
+                    const loginMethod = user.loginMethod || 'manual';
+                    const iconClass = getIconForMethod(loginMethod);
+                    const defaultAvatar = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2FkYmFjNyI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgM2MxLjY2IDAgMyAxLjM0IDMgM3MtMS4zNCAzLTMgMy0zLTEuMzQtMy0zIDEuMzQtMyAzLTN6bTAgMTRjLTIuMzMgMC00LjMyLTEuNDYtNS4xMi0zLjUxLjc5LTEuMjkgMi44Mi0yLjEzIDUuMTItMi4xMyAyLjI5IDAgNC4zMy44NCA1LjEyIDIuMTNDMTYuMzIgMTcuNTQgMTQuMzMgMTkgMTIgMTl6Ii8+PC9zdmc+';
+
+                    row.innerHTML = `
+                        <td>
+                            <div class="user-info">
+                                <img src="${user.picture || defaultAvatar}" alt="${user.name}" class="user-avatar">
+                                <span>${user.name || 'N/A'}</span>
+                            </div>
+                        </td>
+                        <td>${user.email}</td>
+                        <td>
+                            <div class="login-method">
+                                <i class="${iconClass}"></i>
+                                <span>${loginMethod.split(',')[0]}</span>
+                            </div>
+                        </td>
+                        <td>${new Date(user.createdAt).toLocaleDateString()}</td>
+                        <td>${formatTimeAgo(user.lastLoginAt)}</td>
+                    `;
+                    userTableBody.appendChild(row);
+                });
+
+            } catch (error) {
+                userTableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color: var(--error-color); padding: 3rem;">${error.message}</td></tr>`;
+            }
+        }
+        
+        // --- UI & HELPER FUNCTIONS ---
+        function initUI() {
+            initCustomCursor();
+            initThemeToggle();
+        }
+
+        function showToast(message, type = 'success') {
+            const t = document.querySelector('.toast-notification');
+            if (!t) return;
+            t.textContent = message;
+            t.className = `toast-notification ${type} show`;
+            setTimeout(() => { t.classList.remove('show'); }, 4000);
+        }
+        
+        function getIconForMethod(method) {
+            if (method.includes('google')) return 'fab fa-google';
+            if (method.includes('facebook')) return 'fab fa-facebook-f';
+            if (method.includes('github')) return 'fab fa-github';
+            return 'fas fa-envelope';
+        }
+
+        // NEW: Function to format dates into a "time ago" string
+        function formatTimeAgo(dateString) {
+            if (!dateString) return 'Never';
+            
+            const date = new Date(dateString);
+            const now = new Date();
+            const seconds = Math.round((now - date) / 1000);
+            
+            const minutes = Math.round(seconds / 60);
+            const hours = Math.round(minutes / 60);
+            const days = Math.round(hours / 24);
+
+            if (seconds < 60) return 'Just now';
+            if (minutes < 60) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+            if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+            if (days < 7) return `${days} day${days > 1 ? 's' : ''} ago`;
+            
+            return date.toLocaleDateString(); // Fallback for older dates
+        }
+
+        function initCustomCursor() {
+            const cursorDot = document.querySelector(".cursor-dot");
+            const cursorOutline = document.querySelector(".cursor-outline");
+            const interactiveElements = document.querySelectorAll('a, button');
+            window.addEventListener("mousemove", (e) => {
+                cursorDot.style.left = `${e.clientX}px`;
+                cursorDot.style.top = `${e.clientY}px`;
+                cursorOutline.animate({ left: `${e.clientX}px`, top: `${e.clientY}px` }, { duration: 500, fill: "forwards" });
+            });
+            interactiveElements.forEach(el => {
+                el.addEventListener('mouseenter', () => cursorOutline.classList.add('cursor-hover'));
+                el.addEventListener('mouseleave', () => cursorOutline.classList.remove('cursor-hover'));
+            });
+        }
+
+        function initThemeToggle() {
+            const themeToggle = document.getElementById('theme-toggle');
+            themeToggle.addEventListener('click', () => {
+                document.body.classList.toggle('light-theme');
+                themeToggle.innerHTML = document.body.classList.contains('light-theme') ? '<i class="fas fa-cog"></i>' : '<i class="fas fa-moon"></i>';
+            });
+        }
     });
     </script>
 </body>
