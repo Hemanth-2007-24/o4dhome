@@ -14,32 +14,27 @@
         body { background: linear-gradient(180deg, #0d1117 0%, #161b22 100%); background-attachment: fixed; color: var(--text-color, #e0e0e0); }
         body.light-theme { background: #f8f9fa; color: #212529; }
         body.light-theme .top-navbar { background-color: #e9ecef; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        body.light-theme .logo, body.light-theme .nav-link { color: #343a40; }
         body.light-theme .logo { color: #fd7e14; }
+        body.light-theme .theme-toggle-btn, body.light-theme .btn { color: #343a40; }
         body.light-theme .card { background-color: #ffffff; border: 1px solid #dee2e6; }
         
-        /* --- FIXED & UPGRADED TABLE STYLES --- */
-        .admin-table-container { padding: 0; overflow-x: auto; }
+        /* FIX: Correct and robust table styling */
+        .admin-table-container { padding: 1rem; overflow-x: auto; }
         .user-table { width: 100%; border-collapse: collapse; white-space: nowrap; }
-        .user-table th, .user-table td {
-            padding: 1rem 1.5rem;
-            text-align: left;
-            border-bottom: 1px solid var(--card-border);
-        }
-        .user-table th {
-            font-weight: 600;
-            color: var(--primary-color);
-            font-size: 0.9rem;
-            text-transform: uppercase;
-        }
+        .user-table th, .user-table td { padding: 1rem 1.5rem; text-align: left; border-bottom: 1px solid var(--card-border); }
+        .user-table th { font-weight: 600; color: var(--primary-color); }
         body.light-theme .user-table th { color: #fd7e14; }
         .user-table tbody tr { cursor: pointer; transition: background-color 0.3s ease; }
         .user-table tbody tr:hover { background-color: rgba(255, 255, 255, 0.05); }
         body.light-theme .user-table tbody tr:hover { background-color: #f1f3f5; }
-        
+
         .user-info { display: flex; align-items: center; gap: 15px; }
         .user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
-        
-        /* Modal styles are unchanged, they were already good */
+        .login-method { display: flex; align-items: center; gap: 8px; text-transform: capitalize; }
+        .login-method .fab, .login-method .fas { font-size: 1.2rem; }
+
+        /* UPGRADE: Polished Modal UI */
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); z-index: 1000; display: none; align-items: center; justify-content: center; }
         .modal-overlay.active { display: flex; animation: fadeIn 0.3s ease forwards; }
@@ -90,7 +85,34 @@
             </div>
         </section>
     </main>
-    <div class="modal-overlay" id="user-modal"><!-- (Modal HTML is unchanged) --></div>
+    <div class="modal-overlay" id="user-modal">
+        <div class="modal-content">
+            <span class="modal-close" id="modal-close-btn">×</span>
+            <div class="modal-header">
+                <img src="" alt="User Avatar" class="modal-avatar" id="modal-avatar">
+                <div class="modal-header-info">
+                    <h3 id="modal-name"></h3>
+                    <p id="modal-email"></p>
+                </div>
+            </div>
+            <div class="modal-grid">
+                <div class="detail-item"><strong>Provider</strong><span id="modal-provider"></span></div>
+                <div class="detail-item"><strong>Joined Date</strong><span id="modal-joined"></span></div>
+                <div class="detail-item"><strong>Last Login</strong><span id="modal-last-login"></span></div>
+                <div class="detail-item"><strong>Device IP</strong><span id="modal-ip"></span></div>
+                <div class="detail-item"><strong>Operating System</strong><span id="modal-os"></span></div>
+                <div class="detail-item"><strong>Browser</strong><span id="modal-browser"></span></div>
+                <div class="detail-item"><strong>Device Type</strong><span id="modal-device-type"></span></div>
+            </div>
+            <div class="modal-bio">
+                <strong>Bio:</strong>
+                <p id="modal-bio"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" id="delete-user-btn">Delete User</button>
+            </div>
+        </div>
+    </div>
     <div class="toast-notification"></div>
 
     <script>
@@ -110,16 +132,13 @@
         const modalCloseBtn = document.getElementById('modal-close-btn');
         const deleteUserBtn = document.getElementById('delete-user-btn');
 
-        // --- INITIALIZE ---
         initUI();
         loadUsers();
 
-        // --- EVENT LISTENERS ---
         modalCloseBtn.addEventListener('click', closeModal);
         userModal.addEventListener('click', (e) => { if (e.target === userModal) closeModal(); });
         deleteUserBtn.addEventListener('click', handleDeleteUser);
 
-        // --- CORE FUNCTIONS ---
         async function loadUsers() {
             try {
                 const response = await fetch(`${API_BASE_URL}/api/users`, { headers: { 'X-User-Email': currentUser.email }});
@@ -139,6 +158,7 @@
                     const loginMethod = user.loginMethod || 'manual';
                     const iconClass = getIconForMethod(loginMethod);
                     const defaultAvatar = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2FkYmFjNyI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgM2MxLjY2IDAgMyAxLjM0IDMgM3MtMS4zNCAzLTMgMy0zLTEuMzQtMy0zIDEuMzQtMyAzLTN6bTAgMTRjLTIuMzMgMC00LjMyLTEuNDYtNS4xMi0zLjUxLjc5LTEuMjkgMi44Mi0yLjEzIDUuMTItMi4xMyAyLjI5IDAgNC4zMy44NCA1LjEyIDIuMTNDMTYuMzIgMTcuNTQgMTQuMzMgMTkgMTIgMTl6Ii8+PC9zdmc+';
+                    
                     row.innerHTML = `
                         <td><div class="user-info"><img src="${user.picture || defaultAvatar}" alt="${user.name}" class="user-avatar"><span>${user.name || 'N/A'}</span></div></td>
                         <td>${user.email}</td>
@@ -199,11 +219,6 @@
             }
         }
 
-        function closeModal() {
-            userModal.classList.remove('active');
-            document.body.classList.remove('no-scroll');
-        }
-
         function initUI() {
             initCustomCursor();
             initThemeToggle();
@@ -213,12 +228,17 @@
                 setTimeout(() => { window.location.replace('index.html'); }, 1000);
             });
         }
+        
+        function closeModal() {
+            userModal.classList.remove('active');
+            document.body.classList.remove('no-scroll');
+        }
 
         function initCustomCursor() {
             const cursorDot = document.querySelector(".cursor-dot");
             const cursorOutline = document.querySelector(".cursor-outline");
             if (!cursorDot || !cursorOutline) return;
-            const interactiveElements = document.querySelectorAll('a, button, .user-table tbody tr, .modal-close');
+            const interactiveElements = document.querySelectorAll('a, button, .user-table tbody tr');
             window.addEventListener("mousemove", (e) => {
                 cursorDot.style.left = `${e.clientX}px`;
                 cursorDot.style.top = `${e.clientY}px`;
@@ -238,32 +258,30 @@
             });
         }
         
-        // --- UPGRADED User Agent Parser ---
+        // UPGRADED: More accurate User Agent Parser
         function parseUserAgent(ua) {
             if (!ua) return { os: 'N/A', osVersion: '', browser: 'N/A', browserVersion: '', deviceType: 'Unknown' };
+
             let os = 'Unknown', osVersion = '', browser = 'Unknown', browserVersion = '', deviceType = 'Desktop';
             if (/Mobi|Android|iPhone/i.test(ua)) deviceType = 'Mobile';
             else if (/Tablet|iPad/i.test(ua)) deviceType = 'Tablet';
             
-            // OS Detection
-            if (/Windows NT 10.0/.test(ua)) {
-                // To distinguish Windows 10 from 11, we check for a specific hint. This isn't foolproof but is the best we can do from a standard UA string.
-                if (/Windows NT 10.0;.*Win64; x64;.*wv/.test(ua) || /Windows NT 10.0;.*ARM64;.*wv/.test(ua) || ua.includes("Windows 11")) {
-                    os = 'Windows'; osVersion = '11';
-                } else {
-                    os = 'Windows'; osVersion = '10';
-                }
-            } else if (/Windows NT 6.3/.test(ua)) { os = 'Windows'; osVersion = '8.1'; } 
-            else if (/Mac OS X ([0-9_]+)/.test(ua)) { os = 'Mac OS'; osVersion = (RegExp.$1 || '').replace(/_/g, '.'); }
-            else if (/Android ([0-9.]+)/.test(ua)) { os = 'Android'; osVersion = RegExp.$1; }
-            else if (/iPhone OS ([0-9_]+)/.test(ua)) { os = 'iOS'; osVersion = (RegExp.$1 || '').replace(/_/g, '.'); }
+            // Note: Detecting specific Windows 11 can be tricky due to User-Agent compatibility strings.
+            // This logic provides the most common and reliable parsing.
+            if (ua.includes("Windows NT 10.0")) { os = 'Windows'; osVersion = ua.includes("WOW64") || ua.includes("Win64") ? '10 or 11' : '10'; }
+            else if (/Windows NT 6.3/.test(ua)) { os = 'Windows'; osVersion = '8.1'; }
+            else if (/Windows NT 6.2/.test(ua)) { os = 'Windows'; osVersion = '8'; }
+            else if (/Windows NT 6.1/.test(ua)) { os = 'Windows'; osVersion = '7'; }
+            else if (/Mac OS X ([0-9_]+)/.test(ua)) { os = 'Mac OS'; osVersion = RegExp.$1.replace(/_/g, '.'); }
+            else if (/Android ([0-9\.]+)/.test(ua)) { os = 'Android'; osVersion = RegExp.$1; }
+            else if (/iPhone OS ([0-9_]+)/.test(ua)) { os = 'iOS'; osVersion = RegExp.$1.replace(/_/g, '.'); }
             else if (/Linux/.test(ua)) { os = 'Linux'; osVersion = ''; }
             
-            // Browser Detection
-            const edgMatch = ua.match(/Edg\/([0-9.]+)/i);
-            const chromeMatch = ua.match(/Chrome\/([0-9.]+)/i);
-            const safariMatch = ua.match(/Version\/([0-9.]+).*Safari/i);
-            const firefoxMatch = ua.match(/Firefox\/([0-9.]+)/i);
+            const edgMatch = ua.match(/Edg\/([0-9\.]+)/);
+            const chromeMatch = ua.match(/Chrome\/([0-9\.]+)/);
+            const safariMatch = ua.match(/Version\/([0-9\.]+).*Safari/);
+            const firefoxMatch = ua.match(/Firefox\/([0-9\.]+)/);
+
             if (edgMatch) { browser = 'Edge'; browserVersion = edgMatch[1]; }
             else if (chromeMatch && !ua.includes("Edg")) { browser = 'Chrome'; browserVersion = chromeMatch[1]; }
             else if (safariMatch) { browser = 'Safari'; browserVersion = safariMatch[1]; }
