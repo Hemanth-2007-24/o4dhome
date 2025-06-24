@@ -1,0 +1,12 @@
+# This file tells search engine crawlers which pages they are allowed to visit.
+
+# The '*' means this rule applies to all crawlers (e.g., Googlebot, Bingbot).
+User-agent: *
+
+# 'Allow: /' gives crawlers permission to access the entire site.
+Allow: /
+
+
+# This is the most important part: It provides the absolute URL to your sitemap.
+# This helps search engines find and index your site map quickly.
+Sitemap: https://o4dhomepage.onrender.com/sitemap.xml

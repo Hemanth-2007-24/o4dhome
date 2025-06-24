@@ -1,22 +1,46 @@
 <!-- FILENAME: frontend/index.html -->
 <!DOCTYPE html>
 <html lang="en">
+<!-- FILENAME: frontend/index.html -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!-- IMPORTANT: ADD YOUR CLIENT IDS HERE -->
-    <meta name="google-signin-client_id" content="772260889913-3vlll8sbp620c05sg9rfhbmmuh1b8na8.apps.googleusercontent.com">
-    <meta property="fb:app_id" content="2084193538757104" />
+    <!-- ================== SEO ESSENTIALS ================== -->
     
-    <title>O4D - Advanced Digital Solutions</title>
+    <!-- 1. Title Tag -->
+    <title>O4D | AI & 3D Web Development and Design Services</title>
+    
+    <!-- 2. Meta Description -->
+    <meta name="description" content="O4D pioneers digital innovation with custom AI-powered applications, immersive 3D web experiences, and user-centric UI/UX design. Contact us to build your next-gen project.">
+    
+    <!-- 3. Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://o4dhomepage.onrender.com/">
+    <meta property="og:title" content="O4D | AI & 3D Web Development and Design Services">
+    <meta property="og:description" content="O4D pioneers digital innovation with custom AI-powered applications, immersive 3D web experiences, and user-centric UI/UX design.">
+    <meta property="og:image" content="https://o4dhomepage.onrender.com/social-share-image.jpg"> <!-- Create this image! -->
+
+    <!-- 4. Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://o4dhomepage.onrender.com/">
+    <meta property="twitter:title" content="O4D | AI & 3D Web Development and Design Services">
+    <meta property="twitter:description" content="O4D pioneers digital innovation with custom AI-powered applications, immersive 3D web experiences, and user-centric UI/UX design.">
+    <meta property="twitter:image" content="https://o4dhomepage.onrender.com/social-share-image.jpg"> <!-- Create this image! -->
+
+    <!-- ================== APP & FONT CREDENTIALS ================== -->
+    
+    <!-- IMPORTANT: ADD YOUR CLIENT IDS HERE -->
+    <meta name="google-signin-client_id" content="YOUR_GOOGLE_CLIENT_ID">
+    <meta property="fb:app_id" content="YOUR_FACEBOOK_APP_ID" />
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/x-icon" href="https://o4dhome.odoo.com/web/image/website/1/logo/o4dhome?unique=8aacd3c">
-    <!-- EmailJS SDK -->
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     
+    <!-- EmailJS & Google SDKs -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
+    
     <link rel="stylesheet" href="style.css"> 
 </head>
 <body>
@@ -138,8 +162,8 @@
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         // --- CONFIGURATION ---
-        const API_BASE_URL = ''; 
-        const GITHUB_CLIENT_ID = 'Ov23lid0ibCaAI4E3JzS'; 
+        
+        const GITHUB_CLIENT_ID = 'YOUR_GITHUB_CLIENT_ID'; 
         const ADMIN_EMAIL = "info.open4discuss@gmail.com";
 
         // --- UI INITIALIZATION ---
@@ -148,7 +172,7 @@
         initScrollReveal();
         initThemeToggle();
         initAuthSystem();
-        initContactForm(); // <-- Add this line
+        initContactForm(); // <-- This function is now fixed
 
         // --- 1. 3D TILT & MOUSE EFFECT (Unchanged) ---
         function initCustomCursor() {
@@ -203,32 +227,52 @@
             });
         }
         
-        // --- NEW: 4. CONTACT FORM LOGIC ---
+        // --- 4. CONTACT FORM LOGIC (REVISED AND FIXED) ---
         function initContactForm() {
             const contactForm = document.getElementById('contact-form');
-            contactForm.addEventListener('submit', function(e) {
-                e.preventDefault();
+            if (!contactForm) return; 
+
+            // --- IMPORTANT EMAILJS CONFIGURATION ---
+            // YOU MUST GET THESE FROM YOUR EMAILJS ACCOUNT DASHBOARD.
+            // https://dashboard.emailjs.com/
+            const EMAILJS_PUBLIC_KEY = 'service_hi17z3a';    // Found in Account > API Keys
+            const EMAILJS_SERVICE_ID = 'template_t0z0g4h';   // Found in Email Services
+            const EMAILJS_TEMPLATE_ID = 'mKOictDQkrpKt4oko'; // Found in Email Templates
+
+            // Check if placeholder values are still being used.
+            if (EMAILJS_PUBLIC_KEY === 'YOUR_PUBLIC_KEY' || EMAILJS_SERVICE_ID === 'YOUR_SERVICE_ID' || EMAILJS_TEMPLATE_ID === 'YOUR_TEMPLATE_ID') {
+                console.warn("EmailJS is not configured. Please replace placeholder IDs in the script.");
+                const submitBtn = contactForm.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Contact Form Disabled';
+                }
+                return; // Stop initialization
+            }
+
+            // Initialize EmailJS with your Public Key
+            emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+
+            contactForm.addEventListener('submit', function(event) {
+                event.preventDefault();
 
                 const submitBtn = this.querySelector('button[type="submit"]');
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '<span class="spinner" style="border-top-color: #0d1117;"></span> Sending...';
 
-                // Replace with your actual EmailJS IDs
-                const SERVICE_ID = 'service_hi17z3a';
-                const TEMPLATE_ID = 'template_t0z0g4h';
-                const PUBLIC_KEY = 'mKOictDQkrpKt4oko';
-
-                emailjs.sendForm(SERVICE_ID, TEMPLATE_ID, this, PUBLIC_KEY)
+                // The 'this' keyword refers to the form element
+                emailjs.sendForm(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, this)
                     .then(() => {
                         showToast('Message sent successfully! We will get back to you soon.', 'success');
-                        this.reset(); // Clear the form
+                        this.reset(); // Clear the form fields
                     })
-                    .catch((err) => {
-                        showToast('Failed to send message. Please try again.', 'error');
-                        console.error('EmailJS Error:', JSON.stringify(err));
+                    .catch((error) => {
+                        showToast('Failed to send message. Check console for details.', 'error');
+                        // The raw error object is more informative than JSON.stringify(error)
+                        console.error('EMAILJS FAILED...', error);
                     })
                     .finally(() => {
-                        // Re-enable the button regardless of success or failure
+                        // Re-enable the button after the attempt
                         submitBtn.disabled = false;
                         submitBtn.innerHTML = 'Send Message';
                     });
