@@ -12,7 +12,15 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
-
+<!-- Add this script to the <head> of c.html, ai.html, github1.html -->
+<script>
+    // This script runs before the page loads.
+    // It checks if a user is stored in localStorage.
+    if (!localStorage.getItem('currentUser')) {
+        // If no user is found, immediately redirect them to the login page.
+        window.location.replace('index.html#auth');
+    }
+</script>
     <style>
         :root {
             --bg-body: #02040a;
