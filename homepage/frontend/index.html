@@ -6,8 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <!-- ================== SEO ESSENTIALS ================== -->
-    
-    <title>O4D | AI & 3D Web Development</title>
+    <title>O4D | Development</title>
     <meta name="description" content="O4D pioneers digital innovation with custom AI-powered applications, immersive 3D web experiences, and user-centric UI/UX design. Contact us to build your next-gen project.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://o4dhomepage.onrender.com/">
@@ -21,7 +20,6 @@
     <meta property="twitter:image" content="https://o4dhomepage.onrender.com/social-share-image.jpg">
 
     <!-- ================== APP & FONT CREDENTIALS ================== -->
-    
     <meta name="google-signin-client_id" content="772260889913-3vlll8sbp620c05sg9rfhbmmuh1b8na8.apps.googleusercontent.com">
     <meta property="fb:app_id" content="2084193538757104" />
     
@@ -36,123 +34,33 @@
     
     <style>
         /* Default Dark Theme Background */
-        body {
-            background: linear-gradient(180deg, #0d1117 0%, #161b22 100%);
-            background-attachment: fixed;
-            color: var(--text-color, #e0e0e0);
-        }
-
+        body { background: linear-gradient(180deg, #0d1117 0%, #161b22 100%); background-attachment: fixed; color: var(--text-color, #e0e0e0); }
         /* Light Theme Styles */
-        body.light-theme {
-            background: #f8f9fa;
-            color: #212529;
-        }
-
-        body.light-theme .top-navbar {
-            background-color: #e9ecef;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-
-        body.light-theme .logo,
-        body.light-theme .nav-link {
-            color: #343a40;
-        }
-        
-        body.light-theme .logo {
-            color: #fd7e14;
-        }
-
-        body.light-theme .theme-toggle-btn {
-            color: #343a40;
-        }
-
-        body.light-theme .card {
-            background-color: #ffffff;
-            border: 1px solid #dee2e6;
-        }
-
-        body.light-theme h1, body.light-theme h2, body.light-theme h3, body.light-theme p {
-            color: #212529;
-        }
-        
-        body.light-theme .section-title span {
-            color: #fd7e14;
-        }
-
-        body.light-theme .form-input {
-            background-color: #f1f3f5;
-            border-color: #ced4da;
-            color: #495057;
-        }
-        
-        body.light-theme .form-input::placeholder {
-            color: #6c757d;
-        }
-        
-        #hero h1 {
-            font-size: clamp(3.5rem, 10vw, 6rem);
-            font-weight: 700;
-            color: #fff;
-            line-height: 1.2;
-        }
-
-        body.light-theme #hero h1 {
-            color: #212529;
-        }
-        
-        #hero p {
-            font-size: 1.2rem;
-            max-width: 650px;
-        }
-
-        .btn-header-contact {
-            padding: 8px 24px;
-            border-radius: 50px;
-            background-color: #00BFFF;
-            color: #0d1117;
-            font-weight: 600;
-            margin-left: 1rem;
-            box-shadow: 0 0 15px #00BFFF;
-            transition: all 0.3s ease;
-            text-decoration: none;
-        }
-        
-        body.light-theme .btn-header-contact {
-            background-color: #fd7e14;
-            color: #fff;
-            box-shadow: 0 0 15px rgba(253, 126, 20, 0.6);
-        }
-
-        .btn-header-contact:hover {
-            transform: translateY(-2px);
-        }
-
-        body.light-theme .btn-header-contact:hover {
-            box-shadow: 0 0 25px rgba(253, 126, 20, 0.8);
-        }
-
-        /* Styles for Profile link in Nav */
-        .profile-nav-link {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .nav-profile-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid #00BFFF;
-        }
-        body.light-theme .nav-profile-avatar {
-            border-color: #fd7e14;
-        }
+        body.light-theme { background: #f8f9fa; color: #212529; }
+        body.light-theme .top-navbar { background-color: #e9ecef; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        body.light-theme .logo, body.light-theme .nav-link { color: #343a40; }
+        body.light-theme .logo { color: #fd7e14; }
+        body.light-theme .theme-toggle-btn { color: #343a40; }
+        body.light-theme .card { background-color: #ffffff; border: 1px solid #dee2e6; }
+        body.light-theme h1, body.light-theme h2, body.light-theme h3, body.light-theme p { color: #212529; }
+        body.light-theme .section-title span { color: #fd7e14; }
+        body.light-theme .form-input { background-color: #f1f3f5; border-color: #ced4da; color: #495057; }
+        body.light-theme .form-input::placeholder { color: #6c757d; }
+        #hero h1 { font-size: clamp(3.5rem, 10vw, 6rem); font-weight: 700; color: #fff; line-height: 1.2; }
+        body.light-theme #hero h1 { color: #212529; }
+        #hero p { font-size: 1.2rem; max-width: 650px; }
+        .btn-header-contact { padding: 8px 24px; border-radius: 50px; background-color: #00BFFF; color: #0d1117; font-weight: 600; margin-left: 1rem; box-shadow: 0 0 15px #00BFFF; transition: all 0.3s ease; text-decoration: none; }
+        body.light-theme .btn-header-contact { background-color: #fd7e14; color: #fff; box-shadow: 0 0 15px rgba(253, 126, 20, 0.6); }
+        .btn-header-contact:hover { transform: translateY(-2px); }
+        body.light-theme .btn-header-contact:hover { box-shadow: 0 0 25px rgba(253, 126, 20, 0.8); }
+        .profile-nav-link { display: flex; align-items: center; gap: 10px; }
+        .nav-profile-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid #00BFFF; }
+        body.light-theme .nav-profile-avatar { border-color: #fd7e14; }
     </style>
 </head>
 <body>
     <div class="cursor-dot"></div>
     <div class="cursor-outline"></div>
-    
     <div id="fb-root"></div>
     <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
 
@@ -167,47 +75,67 @@
         </nav>
         <div class="header-controls">
             <a href="#contact" class="btn-header-contact">Contact Us</a>
-            <!-- The Login/Profile link will now be dynamically placed here -->
             <div id="nav-login-area" style="display: inline-block;">
-                 <a href="#auth" id="nav-login-link" class="btn-header-contact"style="padding: 8px 14px;">Login</a>
+                 <a href="#auth" id="nav-login-link" class="btn-header-contact" style="padding: 8px 14px;">Login</a>
             </div>
             <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Theme"><i class="fas fa-moon"></i></button>
         </div>
     </header>
 
     <main class="page-container">
-
         <section id="hero" class="hero-section">
             <div class="hero-content tilt-card">
                 <h1>Empowering Your Future</h1>
-                <p>We are a dynamic team of tech enthusiasts and creative thinkers, dedicated to transforming your ideas into powerful digital solutions. [1]</p>
+                <p>We are a dynamic team of tech enthusiasts and creative thinkers, dedicated to transforming your ideas into powerful digital solutions.</p>
             </div>
         </section>
 
         <section id="services" class="section">
             <h2 class="section-title">Our <span>Services</span></h2>
             <div class="card-grid">
-                <a href="c.html" class="card-link tilt-card"><article class="card"><div class="card-content"><i class="fas fa-cubes card-icon"></i><h3>Codelad</h3><p>Engage your coding experiences, and virtual environments directly in their browser.</p><span class="read-more">Learn More <span class="arrow">→</span></span></div></article></a>
-                <a href="ai.html" class="card-link tilt-card"><article class="card"><div class="card-content"><i class="fas fa-robot card-icon"></i><h3>AI Integration</h3><p>Leverage the power of artificial intelligence to automate processes, gain insights, and create smarter applications, with limit api based.</p><span class="read-more">Learn More <span class="arrow">→</span></span></div></article></a>
-                <a href="github1.html" class="card-link tilt-card"><article class="card"><div class="card-content"><i class="fas fa-palette card-icon"></i><h3>Github file editor</h3><p>Crafting intuitive, beautiful, login with pat that provide seamless experiences across all devices.</p><span class="read-more">Learn More <span class="arrow">→</span></span></div></article></a>
+                <a href="c.html" class="card-link tilt-card protected-service-link"><article class="card"><div class="card-content"><i class="fas fa-cubes card-icon"></i><h3>Codelad</h3><p>Engage your coding experiences, and virtual environments directly in their browser.</p><span class="read-more">Learn More <span class="arrow">→</span></span></div></article></a>
+                <a href="ai.html" class="card-link tilt-card protected-service-link"><article class="card"><div class="card-content"><i class="fas fa-robot card-icon"></i><h3>AI Integration</h3><p>Leverage the power of artificial intelligence to automate processes, gain insights, and create smarter applications, with limit api based.</p><span class="read-more">Learn More <span class="arrow">→</span></span></div></article></a>
+                <a href="github1.html" class="card-link tilt-card protected-service-link"><article class="card"><div class="card-content"><i class="fas fa-palette card-icon"></i><h3>Github file editor</h3><p>Crafting intuitive, beautiful, login with pat that provide seamless experiences across all devices.</p><span class="read-more">Learn More <span class="arrow">→</span></span></div></article></a>
             </div>
         </section>
         
         <section id="experts" class="section">
             <h2 class="section-title">Meet Our <span>Experts</span></h2>
             <div class="card-grid experts-grid">
-                <div class="card expert-card"><img src="https://open4discuss.nhforums.net/uploads/avatars/1.jpeg?v=1735058052" alt="Expert Hemanth" class="expert-avatar"><h3 class="expert-name">HEMANTH</h3><p class="expert-title">AI & ML Specialist</p><div class="expert-socials"><a href="https://x.com/HemanthNagothi"><i class="fab fa-twitter"></i></a><a href="https://www.instagram.com/hemanth__nagothi"><i class="fab fa-instagram"></i></a><a href="https://github.com/Hemanth-2007-24"><i class="fab fa-github"></i></a></div></div>
+                <div class="card expert-card"><img src="https://open4discuss.nhforums.net/uploads/avatars/1.jpeg?v=1735058052" alt="Expert Hemanth" class="expert-avatar"><h3 class="expert-name">HEMANTH</h3><p class="expert-title">developer</p><div class="expert-socials"><a href="https://x.com/HemanthNagothi"><i class="fab fa-twitter"></i></a><a href="https://www.instagram.com/hemanth__nagothi"><i class="fab fa-instagram"></i></a><a href="https://github.com/Hemanth-2007-24"><i class="fab fa-github"></i></a></div></div>
             </div>
         </section>
 
-        <!-- This section will be hidden on login -->
         <section id="auth" class="section">
             <h2 class="section-title">Join <span>O4D</span></h2>
             <div class="card auth-card tilt-card">
                 <div class="card-content">
-                    <p style="text-align:center; margin-bottom: 1.5rem; color: var(--text-muted);">
-                        Use a social provider to log in or create an account.
-                    </p>
+                    <div class="auth-tabs">
+                        <div class="auth-tab active" data-form="login">Login</div>
+                        <div class="auth-tab" data-form="signup">Sign Up</div>
+                    </div>
+                    
+                    <div id="login-form-container">
+                        <p style="text-align:center; margin-bottom: 1.5rem; color: var(--text-muted);">Login with your email and password.</p>
+                        <form id="manual-login-form" class="auth-form" style="display: flex; flex-direction: column; gap: 1rem;">
+                            <input type="email" name="email" class="form-input" placeholder="Email Address" required>
+                            <input type="password" name="password" class="form-input" placeholder="Password" required>
+                            <button type="submit" class="btn" style="width:100%;">Login</button>
+                        </form>
+                    </div>
+                    
+                    <div id="signup-form-container" style="display: none;">
+                        <p style="text-align:center; margin-bottom: 1.5rem; color: var(--text-muted);">Create an account to get started.</p>
+                        <form id="manual-signup-form" class="auth-form" style="display: flex; flex-direction: column; gap: 1rem;">
+                            <input type="text" name="name" class="form-input" placeholder="Your Name" required>
+                            <input type="email" name="email" class="form-input" placeholder="Email Address" required>
+                            <input type="password" name="password" class="form-input" placeholder="Password" required>
+                            <button type="submit" class="btn" style="width:100%;">Sign Up</button>
+                        </form>
+                    </div>
+
+                    <div class="divider">OR</div>
+                    
                     <div class="social-login-options">
                         <div id="google-signin-btn"></div>
                         <a id="facebook-signin-btn" class="social-btn"><i class="fab fa-facebook-f"></i> Continue with Facebook</a>
@@ -247,7 +175,7 @@
         <div class="footer-content">
             <div class="footer-section"><h4>About O4D</h4><p>O4D is a collective of designers, developers, and strategists dedicated to pushing the boundaries of digital innovation.</p></div>
             <div class="footer-section"><h4>Quick Links</h4><ul><li><a href="#hero">Home</a></li><li><a href="#services">Services</a></li><li><a href="#experts">Experts</a></li><li><a href="#contact">Contact</a></li></ul></div>
-            <div class="footer-section"><h4>Connect With Us</h4><div class="social-icons"><a href="#" class="social-btn"><i class="fab fa-twitter"></i></a><a href="#" class="social-btn"><i class="fab fa-linkedin-in"></i></a><a href="#" class="social-btn"><i class="fab fa-github"></i></a><a href="#" class="social-btn"><i class="fab fa-dribbble"></i></a></div></div>
+            <div class="footer-section"><h4>Connect With Us</h4><div class="social-icons"><a href="https://x.com/HemanthNagothi" class="social-btn"><i class="fab fa-twitter"></i></a><a href="https://www.linkedin.com/in/hemanth-nagothi-6a84872b2" class="social-btn"><i class="fab fa-linkedin-in"></i></a><a href="https://github.com/Hemanth-2007-24" class="social-btn"><i class="fab fa-github"></i></a></div>
         </div>
         <div class="footer-bottom">© 2024 O4D - Open for Discussion. All Rights Reserved.</div>
     </footer>
@@ -255,7 +183,7 @@
     <div class="toast-notification"></div>
 
     <script>
-    // --- AUTHENTICATION LOGIC (GLOBAL SCOPE for Google Callback) ---
+    // --- GLOBAL AUTHENTICATION & HELPER FUNCTIONS ---
     const GITHUB_CLIENT_ID = 'Ov23lid0ibCaAI4E3JzS';
     const ADMIN_EMAIL = "info.open4discuss@gmail.com";
     const API_BASE_URL = ''; 
@@ -268,9 +196,7 @@
         setTimeout(() => { t.classList.remove('show'); }, 4000);
     }
 
-    function setCurrentUser(user) {
-        localStorage.setItem('currentUser', JSON.stringify(user));
-    }
+    function setCurrentUser(user) { localStorage.setItem('currentUser', JSON.stringify(user)); }
 
     function redirectToPanel(user) {
         const dest = user.email === ADMIN_EMAIL ? 'admin.html' : 'profile.html';
@@ -290,47 +216,35 @@
             return data;
         } catch (error) {
             showToast('Could not connect to the server.', 'error');
-            console.error("API Request Failed:", error);
             return null;
         }
     }
     
-    // NEW: Function to update UI for a logged-in user
     function updateUIAfterLogin(user) {
         const authSection = document.getElementById('auth');
-        const navLoginItem = document.getElementById('nav-login-item');
+        const navLoginArea = document.getElementById('nav-login-area');
         const defaultAvatar = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2FkYmFjNyI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgM2MxLjY2IDAgMyAxLjM0IDMgM3MtMS4zNCAzLTMgMy0zLTEuMzQtMy0zIDEuMzQtMyAzLTN6bTAgMTRjLTIuMzMgMC00LjMyLTEuNDYtNS4xMi0zLjUxLjc5LTEuMjkgMi44Mi0yLjEzIDUuMTItMi4xMyAyLjI5IDAgNC4zMy44NCA1LjEyIDIuMTNDMTYuMzIgMTcuNTQgMTQuMzMgMTkgMTIgMTl6Ii8+PC9zdmc+';
 
         if (authSection) authSection.style.display = 'none';
-        
-        if (navLoginItem) {
-            navLoginItem.innerHTML = `
-                <a href="profile.html" class="nav-link profile-nav-link" title="View Profile">
-                    <img src="${user.picture || defaultAvatar}" alt="User Profile" class="nav-profile-avatar">
-                </a>
-            `;
+        if (navLoginArea) {
+            navLoginArea.innerHTML = `<a href="profile.html" class="nav-link profile-nav-link" title="View Profile" style="padding: 0; margin-left: 1rem;"><img src="${user.picture || defaultAvatar}" alt="User Profile" class="nav-profile-avatar"></a>`;
         }
     }
 
     function handleSuccessfulLogin(user, method) {
         setCurrentUser(user);
-        updateUIAfterLogin(user); // Update UI immediately
+        updateUIAfterLogin(user);
         showToast(`${method} login successful! Redirecting...`, 'success');
         setTimeout(() => redirectToPanel(user), 1500);
     }
     
-    // --- Google Sign-In Callback Functions ---
+    // --- GOOGLE SIGN-IN CALLBACK (GLOBAL SCOPE) ---
     async function handleGoogleCredentialResponse(response) {
         const decoded = JSON.parse(atob(response.credential.split('.')[1]));
         const user = await apiRequest('/api/social-login', 'POST', {
-            name: decoded.name,
-            email: decoded.email,
-            picture: decoded.picture, // Send picture to backend
-            loginMethod: 'google'
+            name: decoded.name, email: decoded.email, picture: decoded.picture, loginMethod: 'google'
         });
-        if (user) {
-            handleSuccessfulLogin(user, 'Google');
-        }
+        if (user) handleSuccessfulLogin(user, 'Google');
     }
 
     function onGoogleLibraryLoad() {
@@ -338,39 +252,21 @@
             client_id: document.querySelector('meta[name="google-signin-client_id"]').content,
             callback: handleGoogleCredentialResponse
         });
-        google.accounts.id.renderButton(
-            document.getElementById('google-signin-btn'), {
-                theme: 'outline',
-                size: 'large',
-                type: 'standard',
-                text: 'continue_with',
-                shape: 'pill',
-                width: '330'
-            }
-        );
+        document.dispatchEvent(new Event('google-library-loaded'));
     }
 
-    // --- UI INITIALIZATION (RUNS AFTER DOM IS LOADED) ---
+    // --- UI INITIALIZATION & EVENT LISTENERS ---
     document.addEventListener('DOMContentLoaded', () => {
-        
-        // NEW: Check login state on page load
         function checkInitialLoginState() {
             const storedUser = localStorage.getItem('currentUser');
             if (storedUser) {
                 try {
-                    const user = JSON.parse(storedUser);
-                    updateUIAfterLogin(user);
+                    updateUIAfterLogin(JSON.parse(storedUser));
                 } catch (e) {
-                    console.error("Could not parse user from localStorage", e);
                     localStorage.removeItem('currentUser');
                 }
             }
         }
-
-        checkInitialLoginState();
-        initUI();
-        initContactForm();
-        initSocialLogins();
 
         function initUI() {
             initCustomCursor();
@@ -380,13 +276,11 @@
         }
 
         function initCustomCursor() {
-            const cursorDot = document.querySelector(".cursor-dot");
-            const cursorOutline = document.querySelector(".cursor-outline");
+            const cursorDot = document.querySelector(".cursor-dot"), cursorOutline = document.querySelector(".cursor-outline");
             if (!cursorDot || !cursorOutline) return;
             const interactiveElements = document.querySelectorAll('a, button, .social-btn');
             window.addEventListener("mousemove", (e) => {
-                cursorDot.style.left = `${e.clientX}px`;
-                cursorDot.style.top = `${e.clientY}px`;
+                cursorDot.style.left = `${e.clientX}px`; cursorDot.style.top = `${e.clientY}px`;
                 cursorOutline.animate({ left: `${e.clientX}px`, top: `${e.clientY}px` }, { duration: 500, fill: "forwards" });
             });
             interactiveElements.forEach(el => {
@@ -396,8 +290,7 @@
         }
 
         function init3dTiltEffect() {
-            const tiltCards = document.querySelectorAll('.tilt-card');
-            tiltCards.forEach(card => {
+            document.querySelectorAll('.tilt-card').forEach(card => {
                 card.addEventListener('mousemove', (e) => {
                     const rect = card.getBoundingClientRect();
                     const rotateX = ((e.clientY - rect.top) - (rect.height / 2)) / (rect.height / 2) * -7;
@@ -437,25 +330,58 @@
             contactForm.addEventListener('submit', function(event) {
                 event.preventDefault();
                 const btn = this.querySelector('button[type="submit"]');
-                btn.disabled = true;
-                btn.innerHTML = '<span class="spinner"></span> Sending...';
+                btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Sending...';
                 emailjs.sendForm('service_hi17z3a', 'template_t0z0g4h', this)
-                    .then(() => {
-                        showToast('Message sent successfully!', 'success');
-                        this.reset();
-                    })
-                    .catch((err) => {
-                        showToast('Failed to send message.', 'error');
-                        console.error('EMAILJS FAILED...', err);
-                    })
-                    .finally(() => {
-                        btn.disabled = false;
-                        btn.innerHTML = 'Send Message';
-                    });
+                    .then(() => { showToast('Message sent successfully!', 'success'); this.reset(); })
+                    .catch((err) => { showToast('Failed to send message.', 'error'); })
+                    .finally(() => { btn.disabled = false; btn.innerHTML = 'Send Message'; });
+            });
+        }
+
+        function initProtectedLinks() {
+            document.querySelectorAll('.protected-service-link').forEach(link => {
+                link.addEventListener('click', (event) => {
+                    if (!localStorage.getItem('currentUser')) {
+                        event.preventDefault();
+                        showToast('Please log in to access this service.', 'error');
+                        document.getElementById('auth').scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            });
+        }
+        
+        function initAuthForms() {
+            const loginForm = document.getElementById('manual-login-form'), signupForm = document.getElementById('manual-signup-form');
+            const loginContainer = document.getElementById('login-form-container'), signupContainer = document.getElementById('signup-form-container');
+            
+            document.querySelectorAll('.auth-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelector('.auth-tab.active').classList.remove('active');
+                    tab.classList.add('active');
+                    const isLogin = tab.dataset.form === 'login';
+                    loginContainer.style.display = isLogin ? 'block' : 'none';
+                    signupContainer.style.display = isLogin ? 'none' : 'block';
+                });
+            });
+
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const user = await apiRequest('/api/login', 'POST', { email: loginForm.email.value, password: loginForm.password.value });
+                if (user) handleSuccessfulLogin(user, 'Manual');
+            });
+
+            signupForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const user = await apiRequest('/api/register', 'POST', { name: signupForm.name.value, email: signupForm.email.value, password: signupForm.password.value });
+                if (user) handleSuccessfulLogin(user, 'Registration');
             });
         }
 
         function initSocialLogins() {
+            document.addEventListener('google-library-loaded', () => {
+                google.accounts.id.renderButton(document.getElementById('google-signin-btn'), { theme: 'outline', size: 'large', type: 'standard', text: 'continue_with', shape: 'pill', width: '330'});
+            });
+
             (function handleGitHubRedirect() {
                 const params = new URLSearchParams(window.location.search);
                 if (params.has('session')) {
@@ -471,15 +397,9 @@
             document.getElementById('facebook-signin-btn').addEventListener('click', () => {
                 FB.login(res => {
                     if (res.authResponse) {
-                        // Request picture along with name and email
                         FB.api('/me', { fields: 'name, email, picture.type(large)' }, async apiRes => {
                             if (!apiRes.email) return showToast('Could not get email from Facebook.', 'error');
-                            const user = await apiRequest('/api/social-login', 'POST', {
-                                name: apiRes.name,
-                                email: apiRes.email,
-                                picture: apiRes.picture.data.url, // Send picture URL
-                                loginMethod: 'facebook'
-                            });
+                            const user = await apiRequest('/api/social-login', 'POST', { name: apiRes.name, email: apiRes.email, picture: apiRes.picture.data.url, loginMethod: 'facebook' });
                             if (user) handleSuccessfulLogin(user, 'Facebook');
                         });
                     }
@@ -491,23 +411,15 @@
                 window.location.href = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}`;
             });
         }
-    });
-    function updateUIAfterLogin(user) {
-            const authSection = document.getElementById('auth');
-            const navLoginArea = document.getElementById('nav-login-area'); // Target the new container
-            const defaultAvatar = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2FkYmFjNyI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgM2MxLjY2IDAgMyAxLjM0IDMgM3MtMS4zNCAzLTMgMy0zLTEuMzQtMy0zIDEuMzQtMyAzLTN6bTAgMTRjLTIuMzMgMC00LjMyLTEuNDYtNS4xMi0zLjUxLjc5LTEuMjkgMi44Mi0yLjEzIDUuMTItMi4xMyAyLjI5IDAgNC4zMy44NCA1LjEyIDIuMTNDMTYuMzIgMTcuNTQgMTQuMzMgMTkgMTIgMTl6Ii8+PC9zdmc+';
 
-            if (authSection) authSection.style.display = 'none';
-            
-            if (navLoginArea) {
-                // Replace the entire content of the login area
-                navLoginArea.innerHTML = `
-                    <a href="profile.html" class="nav-link profile-nav-link" title="View Profile" style="padding: 0; margin-left: 1rem;">
-                        <img src="${user.picture || defaultAvatar}" alt="User Profile" class="nav-profile-avatar">
-                    </a>
-                `;
-            }
-        }
+        // Initialize all application parts
+        checkInitialLoginState();
+        initUI();
+        initProtectedLinks();
+        initAuthForms();
+        initSocialLogins();
+        initContactForm();
+    });
     </script>
 </body>
 </html>
