@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>O4D AI CodeLab (Final)</title>
+    <title>O4D AI CodeLab</title>
     <!-- CodeMirror Core CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
     <!-- CodeMirror Theme CSS -->
@@ -15,6 +15,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/lint/lint.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/fold/foldgutter.css">
     <link rel="icon" type="image/x-icon" href="https://o4dhome.odoo.com/web/image/website/1/logo/o4dhome?unique=8aacd3c">
+    <!-- Add this script to the <head> of c.html, ai.html, github1.html -->
+<script>
+    // This script runs before the page loads.
+    // It checks if a user is stored in localStorage.
+    if (!localStorage.getItem('currentUser')) {
+        // If no user is found, immediately redirect them to the login page.
+        window.location.replace('index.html#auth');
+    }
+</script>
     <style>
 :root {
     --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Ubuntu", sans-serif;
