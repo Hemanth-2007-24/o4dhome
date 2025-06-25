@@ -1,4 +1,3 @@
-<!-- FILENAME: frontend/sitemap.xml -->
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
@@ -29,9 +28,5 @@
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
-
-  <!-- Profile and Admin Pages (Optional, generally good to omit) -->
-  <!-- We are not including profile.html or admin.html because they require login -->
-  <!-- and should not be indexed by Google. -->
 
 </urlset>
