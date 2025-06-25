@@ -5,54 +5,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Your Profile - O4D</title>
-    <meta name="robots" content="noindex, nofollow">
+    <meta name="robots" content="noindex, nofollow"> <!-- Prevents search engines from indexing profile pages -->
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="https://o4dhome.odoo.com/web/image/website/1/logo/o4dhome?unique=8aacd3c">
+    
     <link rel="stylesheet" href="style.css"> 
     <style>
+        /* Shared Theme & Layout Styles */
         body { background: linear-gradient(180deg, #0d1117 0%, #161b22 100%); background-attachment: fixed; color: var(--text-color, #e0e0e0); }
         body.light-theme { background: #f8f9fa; color: #212529; }
         body.light-theme .top-navbar { background-color: #e9ecef; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         body.light-theme .logo, body.light-theme .nav-link { color: #343a40; }
         body.light-theme .logo { color: #fd7e14; }
         body.light-theme .theme-toggle-btn { color: #343a40; }
+        body.light-theme .btn-header-contact { background-color: #fd7e14; color: #fff; }
         body.light-theme .card { background-color: #ffffff; border: 1px solid #dee2e6; }
         body.light-theme h1, body.light-theme h2, body.light-theme h3, body.light-theme p { color: #212529; }
         body.light-theme .section-title span { color: #fd7e14; }
         body.light-theme .form-input { background-color: #f1f3f5; border-color: #ced4da; color: #495057; }
+        body.light-theme .form-input::placeholder { color: #6c757d; }
         
         /* Profile Page Specific Styles */
         .profile-card { max-width: 600px; margin: 0 auto; padding: 2.5rem; }
         .profile-header { text-align: center; margin-bottom: 2rem; }
-        
-        /* NEW: Wrapper for editable avatar */
-        .profile-avatar-wrapper {
-            position: relative;
-            width: 120px;
-            height: 120px;
-            margin: 0 auto 1.5rem auto;
-            cursor: pointer;
-        }
+        .profile-avatar-wrapper { position: relative; width: 120px; height: 120px; margin: 0 auto 1.5rem auto; cursor: pointer; }
         .profile-avatar { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 4px solid var(--primary-color); box-shadow: 0 0 20px var(--glow-color); }
         body.light-theme .profile-avatar { border-color: #fd7e14; box-shadow: 0 0 20px rgba(253, 126, 20, 0.6); }
 
-        .avatar-edit-overlay {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            width: 36px;
-            height: 36px;
-            background-color: var(--primary-color);
-            color: #0d1117;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
-            border: 2px solid var(--bg-color);
-            transition: all 0.3s ease;
-        }
+        .avatar-edit-overlay { position: absolute; bottom: 0; right: 0; width: 36px; height: 36px; background-color: var(--primary-color); color: #0d1117; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; border: 2px solid var(--bg-color); transition: all 0.3s ease; }
         body.light-theme .avatar-edit-overlay { background-color: #fd7e14; color: #fff; }
         .profile-avatar-wrapper:hover .avatar-edit-overlay { transform: scale(1.1); }
         
@@ -60,6 +42,7 @@
         .profile-form label { display: block; font-weight: 500; color: var(--text-muted); margin-bottom: 0.5rem; }
         .profile-form .form-input[disabled] { background-color: rgba(70, 70, 70, 0.2); cursor: not-allowed; }
         body.light-theme .profile-form .form-input[disabled] { background-color: #e9ecef; }
+        .password-card { margin-top: 2rem; }
     </style>
 </head>
 <body>
@@ -68,7 +51,13 @@
 
     <header class="top-navbar">
         <a href="index.html" class="logo">O4D</a>
-        <nav><ul class="nav-links"><li><a href="index.html#services" class="nav-link">Services</a></li><li><a href="index.html#experts" class="nav-link">Experts</a></li><li><a href="index.html#contact" class="nav-link">Contact</a></li></ul></nav>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="index.html#services" class="nav-link">Services</a></li>
+                <li><a href="index.html#experts" class="nav-link">Experts</a></li>
+                <li><a href="index.html#contact" class="nav-link">Contact</a></li>
+            </ul>
+        </nav>
         <div class="header-controls">
             <button id="logout-btn" class="btn">Logout</button>
             <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Theme"><i class="fas fa-moon"></i></button>
@@ -80,20 +69,26 @@
             <h1 class="section-title">Your <span>Profile</span></h1>
             <div class="card profile-card">
                 <div class="profile-header">
-                    <!-- UPDATED: Added wrapper and hidden file input for avatar editing -->
                     <div class="profile-avatar-wrapper" id="avatar-wrapper" title="Change profile picture">
                         <img src="" alt="Your Profile Picture" id="profile-avatar" class="profile-avatar">
                         <div class="avatar-edit-overlay" id="avatar-edit-icon"><i class="fas fa-camera"></i></div>
                     </div>
                     <input type="file" id="avatar-upload-input" accept="image/png, image/jpeg" style="display:none;">
                 </div>
-                
                 <form id="profile-form" class="profile-form">
                     <div class="form-group"><label for="profile-email">Email Address</label><input type="email" id="profile-email" class="form-input" disabled></div>
                     <div class="form-group"><label for="profile-name">Full Name</label><input type="text" id="profile-name" class="form-input" required></div>
                     <div class="form-group"><label for="profile-bio">Short Bio</label><textarea id="profile-bio" class="form-input" rows="4" placeholder="Tell us about yourself..."></textarea></div>
-                    <button type="submit" class="btn" style="width: 100%;">Save Changes</button>
+                    <button type="submit" class="btn" style="width: 100%;">Save Profile Changes</button>
                 </form>
+            </div>
+        </section>
+
+        <section class="section is-visible">
+            <div class="card profile-card password-card">
+                <div id="password-form-container">
+                    <!-- This content will be generated by JavaScript -->
+                </div>
             </div>
         </section>
     </main>
@@ -102,85 +97,99 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const CLOUDINARY_CLOUD_NAME = 'YOUR_CLOUD_NAME'; // <-- PASTE YOUR CLOUDINARY CLOUD NAME HERE
-        const CLOUDINARY_UPLOAD_PRESET = 'YOUR_UPLOAD_PRESET'; // <-- PASTE YOUR UNSIGNED UPLOAD PRESET NAME HERE
+        // --- CONFIGURATION ---
+        // IMPORTANT: Replace with your actual Cloudinary credentials
+        const CLOUDINARY_CLOUD_NAME = 'dz1l5heil'; 
+        const CLOUDINARY_UPLOAD_PRESET = '59f00b7c-6927-4503-a378-ee236fb8bfcf';
 
         const API_BASE_URL = '';
-        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        let currentUser = JSON.parse(localStorage.getItem('currentUser'));
 
-        if (!currentUser) { window.location.replace('index.html'); return; }
+        // --- AUTH GUARD ---
+        if (!currentUser) {
+            window.location.replace('index.html');
+            return;
+        }
 
-        const profileForm = document.getElementById('profile-form');
+        // --- ELEMENT SELECTORS ---
         const avatarWrapper = document.getElementById('avatar-wrapper');
         const avatarUploadInput = document.getElementById('avatar-upload-input');
         const avatarImg = document.getElementById('profile-avatar');
         const nameInput = document.getElementById('profile-name');
         const emailInput = document.getElementById('profile-email');
         const bioInput = document.getElementById('profile-bio');
+        const profileForm = document.getElementById('profile-form');
+        const passwordFormContainer = document.getElementById('password-form-container');
         const logoutBtn = document.getElementById('logout-btn');
 
-        populateForm();
+        // --- INITIALIZE PAGE ---
+        populateProfileForm();
+        renderPasswordForm();
         initUI();
 
+        // --- EVENT LISTENERS ---
         profileForm.addEventListener('submit', handleProfileUpdate);
         logoutBtn.addEventListener('click', handleLogout);
         avatarWrapper.addEventListener('click', () => avatarUploadInput.click());
         avatarUploadInput.addEventListener('change', handleAvatarUpload);
 
-        function populateForm() {
+        // --- HANDLER FUNCTIONS ---
+        function populateProfileForm() {
             const defaultAvatar = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2FkYmFjNyI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgM2MxLjY2IDAgMyAxLjM0IDMgM3MtMS4zNCAzLTMgMy0zLTEuMzQtMy0zIDEuMzQtMyAzLTN6bTAgMTRjLTIuMzMgMC00LjMyLTEuNDYtNS4xMi0zLjUxLjc5LTEuMjkgMi44Mi0yLjEzIDUuMTItMi4xMyAyLjI5IDAgNC4zMy44NCA1LjEyIDIuMTNDMTYuMzIgMTcuNTQgMTQuMzMgMTkgMTIgMTl6Ii8+PC9zdmc+';
             avatarImg.src = currentUser.picture || defaultAvatar;
             nameInput.value = currentUser.name || '';
             emailInput.value = currentUser.email || '';
             bioInput.value = currentUser.bio || '';
         }
+        
+        function renderPasswordForm() {
+            const hasPassword = currentUser.loginMethod && currentUser.loginMethod.includes('manual');
+            let formHTML = hasPassword
+                ? ` <h3 style="text-align: center; margin-bottom: 1.5rem;">Change Password</h3>
+                    <form id="password-form" class="profile-form">
+                        <div class="form-group"><label for="current-password">Current Password</label><input type="password" id="current-password" class="form-input" required></div>
+                        <div class="form-group"><label for="new-password">New Password</label><input type="password" id="new-password" class="form-input" required minlength="6"></div>
+                        <div class="form-group"><label for="confirm-password">Confirm New Password</label><input type="password" id="confirm-password" class="form-input" required></div>
+                        <button type="submit" class="btn" style="width: 100%;">Update Password</button>
+                    </form>`
+                : ` <h3 style="text-align: center; margin-bottom: 1rem;">Create a Password</h3>
+                    <p style="text-align: center; color: var(--text-muted); margin-bottom: 1.5rem;">You signed up with a social account. Create a password to enable manual login.</p>
+                    <form id="password-form" class="profile-form">
+                        <div class="form-group"><label for="new-password">New Password</label><input type="password" id="new-password" class="form-input" required minlength="6"></div>
+                        <div class="form-group"><label for="confirm-password">Confirm New Password</label><input type="password" id="confirm-password" class="form-input" required></div>
+                        <button type="submit" class="btn" style="width: 100%;">Create Password</button>
+                    </form>`;
+            passwordFormContainer.innerHTML = formHTML;
+            document.getElementById('password-form').addEventListener('submit', handlePasswordUpdate);
+        }
 
         async function handleAvatarUpload(e) {
             const file = e.target.files[0];
             if (!file) return;
-
             const editIcon = document.getElementById('avatar-edit-icon');
             editIcon.innerHTML = '<span class="spinner"></span>';
-
             const formData = new FormData();
             formData.append('file', file);
             formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-
             try {
-                // 1. Upload to Cloudinary
-                const cloudinaryRes = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
-                    method: 'POST',
-                    body: formData
-                });
+                const cloudinaryRes = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
                 const cloudinaryData = await cloudinaryRes.json();
                 if (!cloudinaryRes.ok) throw new Error(cloudinaryData.error.message || 'Cloudinary upload failed.');
-                
-                const newPictureUrl = cloudinaryData.secure_url;
-
-                // 2. Update our backend with the new URL
                 const backendRes = await fetch(`${API_BASE_URL}/api/profile`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json', 'X-User-Email': currentUser.email },
-                    body: JSON.stringify({
-                        name: nameInput.value,
-                        bio: bioInput.value,
-                        picture: newPictureUrl 
-                    })
+                    body: JSON.stringify({ name: nameInput.value, bio: bioInput.value, picture: cloudinaryData.secure_url })
                 });
                 const updatedUser = await backendRes.json();
                 if (!backendRes.ok) throw new Error(updatedUser.message || 'Failed to save new picture.');
-                
-                // 3. Update UI and local storage
                 localStorage.setItem('currentUser', JSON.stringify(updatedUser));
-                avatarImg.src = newPictureUrl;
+                avatarImg.src = updatedUser.picture;
                 showToast('Avatar updated successfully!', 'success');
-
             } catch (error) {
                 showToast(error.message, 'error');
-                console.error('Avatar upload failed:', error);
             } finally {
                 editIcon.innerHTML = '<i class="fas fa-camera"></i>';
-                avatarUploadInput.value = ''; // Reset file input
+                avatarUploadInput.value = '';
             }
         }
 
@@ -196,14 +205,45 @@
                     body: JSON.stringify({ name: nameInput.value.trim(), bio: bioInput.value.trim() })
                 });
                 const updatedUser = await response.json();
-                if (!response.ok) throw new Error(updatedUser.message || 'Failed to update profile.');
-                localStorage.setItem('currentUser', JSON.stringify(updatedUser)); 
+                if (!response.ok) throw new Error(updatedUser.message);
+                localStorage.setItem('currentUser', JSON.stringify(updatedUser));
                 showToast('Profile updated successfully!', 'success');
             } catch (error) {
                 showToast(error.message, 'error');
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = 'Save Changes';
+                submitBtn.innerHTML = 'Save Profile Changes';
+            }
+        }
+
+        async function handlePasswordUpdate(e) {
+            e.preventDefault();
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const newPassword = document.getElementById('new-password').value;
+            if (newPassword !== document.getElementById('confirm-password').value) return showToast('New passwords do not match.', 'error');
+            const requestBody = { newPassword };
+            const currentPasswordInput = document.getElementById('current-password');
+            if (currentPasswordInput) requestBody.currentPassword = currentPasswordInput.value;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner"></span> Saving...';
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/password/change`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-User-Email': currentUser.email },
+                    body: JSON.stringify(requestBody)
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message);
+                showToast(data.message, 'success');
+                this.reset();
+                localStorage.setItem('currentUser', JSON.stringify(data.user));
+                currentUser = data.user;
+                renderPasswordForm();
+            } catch (error) {
+                showToast(error.message, 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = currentPasswordInput ? 'Update Password' : 'Create Password';
             }
         }
         
@@ -213,37 +253,40 @@
             setTimeout(() => { window.location.replace('index.html'); }, 1000);
         }
 
-        function initUI() { /* ... same as before ... */ }
-        function initCustomCursor() { /* ... same as before ... */ }
-        function initThemeToggle() { /* ... same as before ... */ }
-        function showToast(message, type = 'success') { /* ... same as before ... */ }
-               function initUI() {
-            initCustomCursor(); // Ensure this is called
+        // --- UI INITIALIZATION HELPERS ---
+        function initUI() {
+            initCustomCursor();
             initThemeToggle();
         }
 
-        // NEW: Add the cursor initialization function
         function initCustomCursor() {
-            const cursorDot = document.querySelector(".cursor-dot");
-            const cursorOutline = document.querySelector(".cursor-outline");
-            if (!cursorDot || !cursorOutline) return;
-            // Select all interactive elements on this page
-            const interactiveElements = document.querySelectorAll('a, button, input, textarea, .profile-avatar-wrapper');
-            
+            const cursorDot = document.querySelector(".cursor-dot"), cursorOutline = document.querySelector(".cursor-outline");
+            const interactiveElements = document.querySelectorAll('a, button');
             window.addEventListener("mousemove", (e) => {
-                const posX = e.clientX;
-                const posY = e.clientY;
-                cursorDot.style.left = `${posX}px`;
-                cursorDot.style.top = `${posY}px`;
-                cursorOutline.animate({ left: `${posX}px`, top: `${posY}px` }, { duration: 500, fill: "forwards" });
+                cursorDot.style.left = `${e.clientX}px`; cursorDot.style.top = `${e.clientY}px`;
+                cursorOutline.animate({ left: `${e.clientX}px`, top: `${e.clientY}px` }, { duration: 500, fill: "forwards" });
             });
-            
             interactiveElements.forEach(el => {
                 el.addEventListener('mouseenter', () => cursorOutline.classList.add('cursor-hover'));
                 el.addEventListener('mouseleave', () => cursorOutline.classList.remove('cursor-hover'));
             });
         }
 
+        function initThemeToggle() {
+            const themeToggle = document.getElementById('theme-toggle');
+            themeToggle.addEventListener('click', () => {
+                document.body.classList.toggle('light-theme');
+                themeToggle.innerHTML = document.body.classList.contains('light-theme') ? '<i class="fas fa-cog"></i>' : '<i class="fas fa-moon"></i>';
+            });
+        }
+        
+        function showToast(message, type = 'success') {
+            const t = document.querySelector('.toast-notification');
+            if (!t) return;
+            t.textContent = message;
+            t.className = `toast-notification ${type} show`;
+            setTimeout(() => { t.classList.remove('show'); }, 4000);
+        }
     });
     </script>
 </body>
