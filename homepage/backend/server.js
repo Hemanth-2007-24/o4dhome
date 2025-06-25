@@ -27,7 +27,7 @@ mongoose.connect(process.env.MONGO_URI, {
 const UserSchema = new mongoose.Schema({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    password: { type: String }, // Optional: Not present for social logins
+    password: { type: String }, // Optional: Not present for initial social logins
     loginMethod: { type: String, required: true, default: 'manual' },
     bio: { type: String, default: '' },
     picture: { type: String }, // URL to the user's avatar
@@ -82,7 +82,7 @@ app.post('/api/register', async (req, res) => {
             lastLoginAt: new Date()
         });
         await newUser.save();
-        res.status(201).json({ name: newUser.name, email: newUser.email, bio: newUser.bio, picture: newUser.picture });
+        res.status(201).json(newUser);
     } catch (error) {
         res.status(500).json({ message: 'Server error during registration.' });
     }
@@ -93,16 +93,17 @@ app.post('/api/login', async (req, res) => {
     try {
         const { email, password } = req.body;
         const user = await User.findOne({ email });
-        if (!user || user.loginMethod !== 'manual') {
+        if (!user || !user.password) { // Check if user or password exists
             return res.status(400).json({ message: 'Invalid credentials or not a manual account.' });
         }
         // Compare the provided password with the hashed password in the database
-        if (!await bcrypt.compare(password, user.password)) {
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
             return res.status(400).json({ message: 'Invalid credentials.' });
         }
         user.lastLoginAt = new Date();
         await user.save();
-        res.status(200).json({ name: user.name, email: user.email, bio: user.bio, picture: user.picture });
+        res.status(200).json(user);
     } catch (error) {
         res.status(500).json({ message: 'Server error during login.' });
     }
@@ -113,7 +114,7 @@ app.post('/api/social-login', async (req, res) => {
     try {
         const { name, email, loginMethod, picture } = req.body;
         const user = await findOrCreateUser({ name, email, loginMethod, picture });
-        res.status(200).json({ name: user.name, email: user.email, bio: user.bio, picture: user.picture });
+        res.status(200).json(user);
     } catch (error) {
         res.status(500).json({ message: 'Server error during social login.' });
     }
@@ -151,6 +152,7 @@ app.get('/api/github/callback', async (req, res) => {
             picture: githubUser.avatar_url,
         });
         
+        // Return the full user object to the frontend
         const sessionData = Buffer.from(JSON.stringify(user.toObject())).toString('base64');
         res.redirect(`${process.env.FRONTEND_URL}/index.html?session=${sessionData}`);
     } catch (error) {
@@ -167,7 +169,7 @@ app.put('/api/profile', async (req, res) => {
     
     try {
         const updateData = { name: name.trim(), bio: bio.trim() };
-        if (picture) updateData.picture = picture; // Only update picture if provided
+        if (picture) updateData.picture = picture; // Only update picture if a new one was provided
 
         const updatedUser = await User.findOneAndUpdate({ email: userEmail }, { $set: updateData }, { new: true, select: '-password' });
         if (!updatedUser) return res.status(404).json({ message: 'User not found.' });
@@ -177,6 +179,40 @@ app.put('/api/profile', async (req, res) => {
         res.status(500).json({ message: 'Server error while updating profile.' });
     }
 });
+
+// --- API: Change or Create a Password ---
+app.post('/api/password/change', async (req, res) => {
+    const userEmail = req.headers['x-user-email'];
+    const { currentPassword, newPassword } = req.body;
+
+    if (!userEmail) return res.status(401).json({ message: 'Unauthorized.' });
+    if (!newPassword || newPassword.length < 6) return res.status(400).json({ message: 'New password must be at least 6 characters.' });
+
+    try {
+        const user = await User.findOne({ email: userEmail });
+        if (!user) return res.status(404).json({ message: 'User not found.' });
+
+        // If user already has a password (manual account), verify the current one
+        if (user.password) {
+            if (!currentPassword) return res.status(400).json({ message: 'Current password is required.' });
+            if (!await bcrypt.compare(currentPassword, user.password)) {
+                return res.status(403).json({ message: 'Incorrect current password.' });
+            }
+        }
+
+        // Hash and save the new password
+        user.password = await bcrypt.hash(newPassword, 10);
+        if (!user.loginMethod.includes('manual')) {
+            user.loginMethod += ', manual'; // Add "manual" as a login option
+        }
+        await user.save();
+        
+        res.status(200).json({ message: 'Password updated successfully!', user });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error while updating password.' });
+    }
+});
+
 
 // --- API: Admin Route to Get All Users ---
 app.get('/api/users', async (req, res) => {
@@ -191,6 +227,11 @@ app.get('/api/users', async (req, res) => {
     }
 });
 
+
+// --- SERVER STARTUP ---
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
 
 // --- SERVER STARTUP ---
 app.listen(PORT, () => {
