@@ -4,11 +4,14 @@
 require('dotenv').config(); // Loads environment variables from a .env file
 const express = require('express');
 const mongoose = require('mongoose');
-const cors = require('cors');
+const cors =require('cors');
 const bcrypt = require('bcryptjs'); // Used for hashing and comparing passwords securely
 const fetch = require('node-fetch'); // Used for making HTTP requests (e.g., to GitHub's API)
 
 const app = express();
+// IMPORTANT: This line is crucial for deploying on Render.
+// It uses the port Render provides via the PORT environment variable,
+// or defaults to 3000 for local development.
 const PORT = process.env.PORT || 3000;
 
 // --- MIDDLEWARE ---
@@ -72,14 +75,9 @@ app.post('/api/register', async (req, res) => {
         if (await User.findOne({ email })) {
             return res.status(400).json({ message: 'User with this email already exists.' });
         }
-        // Hash the password for security before saving it
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new User({ 
-            name, 
-            email, 
-            password: hashedPassword, 
-            loginMethod: 'manual',
-            lastLoginAt: new Date()
+            name, email, password: hashedPassword, loginMethod: 'manual', lastLoginAt: new Date()
         });
         await newUser.save();
         res.status(201).json(newUser);
@@ -93,10 +91,9 @@ app.post('/api/login', async (req, res) => {
     try {
         const { email, password } = req.body;
         const user = await User.findOne({ email });
-        if (!user || !user.password) { // Check if user or password exists
+        if (!user || !user.password) {
             return res.status(400).json({ message: 'Invalid credentials or not a manual account.' });
         }
-        // Compare the provided password with the hashed password in the database
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(400).json({ message: 'Invalid credentials.' });
@@ -135,7 +132,8 @@ app.get('/api/github/callback', async (req, res) => {
         });
         const tokenData = await tokenResponse.json();
         const accessToken = tokenData.access_token;
-        
+        if (!accessToken) throw new Error('Failed to retrieve GitHub access token.');
+
         const userResponse = await fetch('https://api.github.com/user', { headers: { 'Authorization': `token ${accessToken}` } });
         const githubUser = await userResponse.json();
         
@@ -152,7 +150,6 @@ app.get('/api/github/callback', async (req, res) => {
             picture: githubUser.avatar_url,
         });
         
-        // Return the full user object to the frontend
         const sessionData = Buffer.from(JSON.stringify(user.toObject())).toString('base64');
         res.redirect(`${process.env.FRONTEND_URL}/index.html?session=${sessionData}`);
     } catch (error) {
@@ -169,7 +166,7 @@ app.put('/api/profile', async (req, res) => {
     
     try {
         const updateData = { name: name.trim(), bio: bio.trim() };
-        if (picture) updateData.picture = picture; // Only update picture if a new one was provided
+        if (picture) updateData.picture = picture;
 
         const updatedUser = await User.findOneAndUpdate({ email: userEmail }, { $set: updateData }, { new: true, select: '-password' });
         if (!updatedUser) return res.status(404).json({ message: 'User not found.' });
@@ -192,7 +189,6 @@ app.post('/api/password/change', async (req, res) => {
         const user = await User.findOne({ email: userEmail });
         if (!user) return res.status(404).json({ message: 'User not found.' });
 
-        // If user already has a password (manual account), verify the current one
         if (user.password) {
             if (!currentPassword) return res.status(400).json({ message: 'Current password is required.' });
             if (!await bcrypt.compare(currentPassword, user.password)) {
@@ -200,10 +196,9 @@ app.post('/api/password/change', async (req, res) => {
             }
         }
 
-        // Hash and save the new password
         user.password = await bcrypt.hash(newPassword, 10);
         if (!user.loginMethod.includes('manual')) {
-            user.loginMethod += ', manual'; // Add "manual" as a login option
+            user.loginMethod += ', manual';
         }
         await user.save();
         
@@ -212,7 +207,6 @@ app.post('/api/password/change', async (req, res) => {
         res.status(500).json({ message: 'Server error while updating password.' });
     }
 });
-
 
 // --- API: Admin Route to Get All Users ---
 app.get('/api/users', async (req, res) => {
@@ -227,11 +221,6 @@ app.get('/api/users', async (req, res) => {
     }
 });
 
-
-// --- SERVER STARTUP ---
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
 
 // --- SERVER STARTUP ---
 app.listen(PORT, () => {
