@@ -12,33 +12,20 @@
     <link rel="stylesheet" href="style.css">
     <style>
         /* Base and Theme Styles */
-        body { background: linear-gradient(180deg, #0d1117 0%, #161b22 100%); background-attachment: fixed; color: var(--text-color, #e0e0e0); font-family: 'Poppins', sans-serif; }
+        body { background: linear-gradient(180deg, #0d1117 0%, #161b22 100%); background-attachment: fixed; color: var(--text-color, #e0e0e0); }
         body.light-theme { background: #f8f9fa; color: #212529; }
-        .page-container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-        .section { padding: 6rem 0; opacity: 0; transform: translateY(40px); transition: opacity 0.8s ease-out, transform 0.8s ease-out; }
-        .section.is-visible { opacity: 1; transform: translateY(0); }
-        .section-title { text-align: center; font-size: clamp(2rem, 5vw, 3rem); color: var(--text-color); margin-bottom: 4rem; font-weight: 600; }
-        .section-title span { color: var(--primary-color); }
-        body.light-theme .section-title span { color: #fd7e14; }
-        body.light-theme h1, body.light-theme h2, body.light-theme h3, body.light-theme p { color: #212529; }
-        .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 18px; backdrop-filter: blur(8px); }
-        body.light-theme .card { background-color: #ffffff; border: 1px solid #dee2e6; }
-        .btn { border: none; padding: 10px 24px; border-radius: 8px; font-weight: 600; transition: all 0.3s ease-out; cursor: pointer; text-decoration: none; }
-        
-        /* Header Styles */
-        .top-navbar { position: sticky; top: 0; width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 1rem 5%; background-color: var(--navbar-bg); backdrop-filter: blur(12px); border-bottom: 1px solid var(--card-border); z-index: 1000; }
-        .logo { font-size: 2rem; font-weight: 700; color: var(--primary-color); text-decoration: none; }
-        .header-controls { display: flex; align-items: center; gap: 1rem; }
-        .theme-toggle-btn { background: none; border: 1px solid var(--text-muted); color: var(--text-muted); width: 40px; height: 40px; border-radius: 50%; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
-        .theme-toggle-btn:hover { color: var(--primary-color); border-color: var(--primary-color); transform: scale(1.1); }
         body.light-theme .top-navbar { background-color: #e9ecef; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        body.light-theme .logo { color: #fd7e14; }
-        
-        /* Table Styles */
+        body.light-theme .logo, body.light-theme .btn-header-contact { color: #fd7e14; }
+        body.light-theme .card { background-color: #ffffff; border: 1px solid #dee2e6; }
+        body.light-theme h1, body.light-theme h2, body.light-theme h3, body.light-theme p { color: #212529; }
+        body.light-theme .section-title span { color: #fd7e14; }
+        body.no-scroll { overflow: hidden; }
+
+        /* Main User Table Styles */
         .admin-table-container { padding: 1rem; overflow-x: auto; }
         .user-table { width: 100%; border-collapse: collapse; white-space: nowrap; }
         .user-table th, .user-table td { padding: 1rem 1.5rem; text-align: left; border-bottom: 1px solid var(--card-border); }
-        .user-table th { font-weight: 600; color: var(--primary-color); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; }
+        .user-table th { font-weight: 600; color: var(--primary-color); }
         body.light-theme .user-table th { color: #fd7e14; }
         .user-table tbody tr { cursor: pointer; transition: background-color 0.3s ease; }
         .user-table tbody tr:hover { background-color: rgba(255, 255, 255, 0.05); }
@@ -47,9 +34,9 @@
         .user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
         
         /* Modal Styles */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); z-index: 1001; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); z-index: 1000; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease; }
         .modal-overlay.active { display: flex; opacity: 1; }
-        .modal-content { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; width: 90%; max-width: 600px; padding: 2.5rem; position: relative; transform: scale(0.95); transition: transform 0.3s ease; }
+        .modal-content { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; width: 90%; max-width: 650px; padding: 2.5rem; position: relative; transform: scale(0.95); transition: transform 0.3s ease; }
         .modal-overlay.active .modal-content { transform: scale(1); }
         body.light-theme .modal-content { background: #fff; }
         .modal-close { position: absolute; top: 15px; right: 20px; font-size: 2rem; color: var(--text-muted); cursor: pointer; transition: color 0.3s ease; }
@@ -59,23 +46,19 @@
         body.light-theme .modal-avatar { border-color: #fd7e14; }
         .modal-header-info h3 { font-size: 1.8rem; margin: 0; }
         .modal-header-info p { margin: 0; color: var(--text-muted); font-size: 0.9rem; word-break: break-all; }
-        .modal-body h4 { font-size: 1.2rem; color: var(--text-color); border-bottom: 1px solid var(--card-border); padding-bottom: 0.5rem; margin-bottom: 1rem; }
-        body.light-theme .modal-body h4 { color: #212529; }
-        .modal-body ul { list-style: none; padding: 0; }
-        .modal-body li { display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 0; border-bottom: 1px solid var(--card-border); }
-        .modal-body li:last-child { border-bottom: none; }
-        .modal-body li strong { color: var(--primary-color); }
-        body.light-theme .modal-body li strong { color: #fd7e14; }
-        .modal-body li span { text-align: right; max-width: 65%; word-break: break-word;}
+        
+        /* NEW: Styles for the details table inside the modal */
+        .modal-details-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        .modal-details-table td { padding: 0.9rem 0; border-bottom: 1px solid var(--card-border); vertical-align: top; }
+        .modal-details-table tr:last-child td { border-bottom: none; }
+        .modal-details-table td:first-child { font-weight: 600; color: var(--primary-color); padding-right: 1rem; }
+        body.light-theme .modal-details-table td:first-child { color: #fd7e14; }
+        .modal-details-table td:last-child { text-align: right; word-break: break-word; }
+
         .modal-bio { margin-top: 1.5rem; padding: 1rem; background-color: rgba(0,0,0,0.2); border-radius: 8px; }
         .modal-footer { margin-top: 2rem; text-align: right; }
         .btn-danger { background: var(--error-color); color: #fff; box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4); }
         .btn-danger:hover { background: #c82333; filter: brightness(1.1); }
-        body.no-scroll { overflow: hidden; }
-        
-        /* Spinner for loading states */
-        .spinner { display: inline-block; width: 1em; height: 1em; border: 2px solid transparent; border-top-color: currentColor; border-radius: 50%; animation: spin 0.6s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -85,7 +68,7 @@
     <header class="top-navbar">
         <a href="index.html" class="logo">O4D Admin</a>
         <div class="header-controls">
-            <button id="logout-btn" class="btn">Logout</button>
+            <button id="logout-btn" class="btn btn-header-contact" style="padding: 8px 14px;">Logout</button>
             <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Theme"><i class="fas fa-moon"></i></button>
         </div>
     </header>
@@ -119,16 +102,18 @@
                 </div>
             </div>
             <div class="modal-body">
-                <h4>User Details</h4>
-                <ul>
-                    <li><strong>Provider(s):</strong> <span id="modal-provider"></span></li>
-                    <li><strong>Joined:</strong> <span id="modal-joined"></span></li>
-                    <li><strong>Last Login:</strong> <span id="modal-last-login"></span></li>
-                    <li><strong>Location:</strong> <span id="modal-location"></span></li>
-                    <li><strong>Last Login IP:</strong> <span id="modal-ip"></span></li>
-                    <li><strong>OS & Browser:</strong> <span id="modal-os-browser"></span></li>
-                    <li><strong>Device:</strong> <span id="modal-device"></span></li>
-                </ul>
+                <!-- UPDATED: Details are now in a clean table structure -->
+                <table class="modal-details-table">
+                    <tbody>
+                        <tr><td><strong>Provider(s):</strong></td><td><span id="modal-provider"></span></td></tr>
+                        <tr><td><strong>Joined:</strong></td><td><span id="modal-joined"></span></td></tr>
+                        <tr><td><strong>Last Login:</strong></td><td><span id="modal-last-login"></span></td></tr>
+                        <tr><td><strong>Location:</strong></td><td><span id="modal-location"></span></td></tr>
+                        <tr><td><strong>Last Login IP:</strong></td><td><span id="modal-ip"></span></td></tr>
+                        <tr><td><strong>OS & Browser:</strong></td><td><span id="modal-os-browser"></span></td></tr>
+                        <tr><td><strong>Device:</strong></td><td><span id="modal-device"></span></td></tr>
+                    </tbody>
+                </table>
                 <div class="modal-bio">
                     <strong>Bio:</strong>
                     <p id="modal-bio" style="margin-top: 0.5rem;"></p>
@@ -265,7 +250,7 @@
         function initCustomCursor() {
             const cursorDot = document.querySelector(".cursor-dot"), cursorOutline = document.querySelector(".cursor-outline");
             if (!cursorDot || !cursorOutline) return;
-            const interactiveElements = document.querySelectorAll('a, button, [data-index], .modal-close');
+            const interactiveElements = document.querySelectorAll('a, button, [data-index]');
             window.addEventListener("mousemove", (e) => {
                 cursorDot.style.left = `${e.clientX}px`; cursorDot.style.top = `${e.clientY}px`;
                 cursorOutline.animate({ left: `${e.clientX}px`, top: `${e.clientY}px` }, { duration: 500, fill: "forwards" });
@@ -278,14 +263,12 @@
 
         function initThemeToggle() {
             const themeToggle = document.getElementById('theme-toggle');
-            const logoutBtn = document.getElementById('logout-btn');
-
-            themeToggle.addEventListener('click', () => {
+            if(themeToggle) themeToggle.addEventListener('click', () => {
                 document.body.classList.toggle('light-theme');
-                themeToggle.innerHTML = document.body.classList.contains('light-theme') ? '<i class="fas fa-cog"></i>' : '<i class="fas fa-moon"></i>';
+                themeToggle.innerHTML = document.body.classList.contains('light-theme') ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-cog"></i>';
             });
-            
-            logoutBtn.addEventListener('click', () => {
+            const logoutBtn = document.getElementById('logout-btn');
+            if(logoutBtn) logoutBtn.addEventListener('click', () => {
                 localStorage.removeItem('currentUser');
                 showToast('Logging out...', 'success');
                 setTimeout(() => { window.location.replace('index.html'); }, 1000);
