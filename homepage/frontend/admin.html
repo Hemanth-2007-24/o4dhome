@@ -6,68 +6,71 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - O4D</title>
     <meta name="robots" content="noindex, nofollow">
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/x-icon" href="https://o4dhome.odoo.com/web/image/website/1/logo/o4dhome?unique=8aacd3c">
-    
     <link rel="stylesheet" href="style.css">
     <style>
-        /* Shared styles for consistency */
-        body { background: linear-gradient(180deg, #0d1117 0%, #161b22 100%); background-attachment: fixed; color: var(--text-color, #e0e0e0); cursor: none; }
+        /* Base and Theme Styles */
+        body { background: linear-gradient(180deg, #0d1117 0%, #161b22 100%); background-attachment: fixed; color: var(--text-color, #e0e0e0); }
         body.light-theme { background: #f8f9fa; color: #212529; }
         body.light-theme .top-navbar { background-color: #e9ecef; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         body.light-theme .logo { color: #fd7e14; }
-        body.light-theme .theme-toggle-btn { color: #343a40; }
-        body.light-theme .btn { background: #fd7e14; color: #fff; }
+        body.light-theme .btn-header-contact { background-color: #fd7e14; color: #fff; box-shadow: 0 0 15px rgba(253, 126, 20, 0.6); }
         body.light-theme .card { background-color: #ffffff; border: 1px solid #dee2e6; }
         body.light-theme h1, body.light-theme h2, body.light-theme h3, body.light-theme p { color: #212529; }
         body.light-theme .section-title span { color: #fd7e14; }
-        
-        /* Admin Page Specific Styles */
-        .admin-table-container { padding: 0.5rem; overflow-x: auto; }
+        body.no-scroll { overflow: hidden; }
+
+        /* Table Styles */
+        .admin-table-container { padding: 1rem; overflow-x: auto; }
         .user-table { width: 100%; border-collapse: collapse; white-space: nowrap; }
-        .user-table th, .user-table td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--card-border); }
+        .user-table th, .user-table td { padding: 1rem 1.5rem; text-align: left; border-bottom: 1px solid var(--card-border); }
         .user-table th { font-weight: 600; color: var(--primary-color); }
         body.light-theme .user-table th { color: #fd7e14; }
-        .user-table tbody tr { transition: background-color 0.3s ease; cursor: pointer; }
+        .user-table tbody tr { cursor: pointer; transition: background-color 0.3s ease; }
         .user-table tbody tr:hover { background-color: rgba(255, 255, 255, 0.05); }
         body.light-theme .user-table tbody tr:hover { background-color: #f1f3f5; }
-
         .user-info { display: flex; align-items: center; gap: 15px; }
         .user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+        .login-method { text-transform: capitalize; }
+        .login-method .fab, .login-method .fas { font-size: 1.2rem; margin-right: 8px; vertical-align: middle; }
         
-        /* MODAL STYLES */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); backdrop-filter: blur(5px); display: none; align-items: center; justify-content: center; z-index: 2000; opacity: 0; transition: opacity 0.3s ease; }
-        .modal-overlay.is-visible { display: flex; opacity: 1; }
-        .modal-content { background-color: #161b22; border: 1px solid var(--card-border); border-radius: 1rem; width: 90%; max-width: 650px; padding: 2rem; transform: scale(0.95); transition: transform 0.3s ease; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
-        body.light-theme .modal-content { background-color: #ffffff; }
-        .modal-overlay.is-visible .modal-content { transform: scale(1); }
-        .modal-close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.5rem; color: var(--text-muted); cursor: pointer; line-height: 1; }
-        .modal-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; }
-        .modal-avatar { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; }
-        .modal-user-name { font-size: 1.5rem; font-weight: 600; }
-        .modal-user-email { color: var(--text-muted); font-size: 0.9rem; }
-        .modal-details-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
-        .detail-item label { display: block; font-size: 0.8rem; color: var(--primary-color); font-weight: 600; margin-bottom: 0.25rem; text-transform: uppercase; }
-        body.light-theme .detail-item label { color: #fd7e14; }
-        .detail-item p { margin: 0; }
-        .modal-bio { margin-bottom: 2rem; }
-        .modal-bio label { font-size: 0.8rem; color: var(--primary-color); font-weight: 600; margin-bottom: 0.5rem; text-transform: uppercase; }
-        body.light-theme .modal-bio label { color: #fd7e14; }
-        .modal-footer { border-top: 1px solid var(--card-border); padding-top: 1.5rem; text-align: right; }
-        .btn-danger { background: var(--error-color); color: white; border: none; box-shadow: 0 0 15px rgba(220, 53, 69, 0.5); }
+        /* Modal Styles */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); z-index: 1000; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease; }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal-content { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; width: 90%; max-width: 600px; padding: 2.5rem; position: relative; transform: scale(0.95); transition: transform 0.3s ease; }
+        .modal-overlay.active .modal-content { transform: scale(1); }
+        body.light-theme .modal-content { background: #fff; }
+        .modal-close { position: absolute; top: 15px; right: 20px; font-size: 2rem; color: var(--text-muted); cursor: pointer; transition: color 0.3s ease; }
+        .modal-close:hover { color: var(--primary-color); }
+        .modal-header { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem; }
+        .modal-avatar { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary-color); }
+        body.light-theme .modal-avatar { border-color: #fd7e14; }
+        .modal-header-info h3 { font-size: 1.8rem; margin: 0; }
+        .modal-header-info p { margin: 0; color: var(--text-muted); font-size: 0.9rem; word-break: break-all; }
+        .modal-body h4 { font-size: 1.2rem; color: var(--text-color); border-bottom: 1px solid var(--card-border); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+        body.light-theme .modal-body h4 { color: #212529; }
+        .modal-body ul { list-style: none; padding: 0; }
+        .modal-body li { display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 0; border-bottom: 1px solid var(--card-border); }
+        .modal-body li:last-child { border-bottom: none; }
+        .modal-body li strong { color: var(--primary-color); }
+        body.light-theme .modal-body li strong { color: #fd7e14; }
+        .modal-body li span { text-align: right; max-width: 65%; word-break: break-word;}
+        .modal-bio { margin-top: 1.5rem; padding: 1rem; background-color: rgba(0,0,0,0.2); border-radius: 8px; }
+        .modal-footer { margin-top: 2rem; text-align: right; }
+        .btn-danger { background: var(--error-color); color: #fff; box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4); }
+        .btn-danger:hover { background: #c82333; filter: brightness(1.1); }
     </style>
 </head>
 <body>
-    <!-- FIXED: Custom cursor HTML elements are now present -->
     <div class="cursor-dot"></div>
     <div class="cursor-outline"></div>
-
+    
     <header class="top-navbar">
         <a href="index.html" class="logo">O4D Admin</a>
         <div class="header-controls">
-            <button id="logout-btn" class="btn">Logout</button>
+            <button id="logout-btn" class="btn btn-header-contact" style="padding: 8px 14px;">Logout</button>
             <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Theme"><i class="fas fa-moon"></i></button>
         </div>
     </header>
@@ -79,10 +82,10 @@
                 <div class="admin-table-container">
                     <table class="user-table">
                         <thead>
-                            <tr><th>User</th><th>Email</th><th>Last Seen</th></tr>
+                            <tr><th>User</th><th>Email</th><th>Last Seen</th><th>Location</th></tr>
                         </thead>
                         <tbody id="user-table-body">
-                            <tr><td colspan="3" style="text-align:center; padding: 3rem;">Loading users...</td></tr>
+                            <tr><td colspan="4" style="text-align:center; padding: 3rem;">Loading...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -90,32 +93,34 @@
         </section>
     </main>
 
-    <!-- USER DETAIL MODAL -->
-    <div id="user-modal" class="modal-overlay">
+    <div class="modal-overlay" id="user-modal">
         <div class="modal-content">
-            <button id="modal-close-btn" class="modal-close">×</button>
+            <span class="modal-close" id="modal-close-btn">×</span>
             <div class="modal-header">
-                <img id="modal-avatar" src="" alt="User Avatar" class="modal-avatar">
-                <div>
-                    <h3 id="modal-user-name" class="modal-user-name"></h3>
-                    <p id="modal-user-email" class="modal-user-email"></p>
+                <img src="" alt="User Avatar" class="modal-avatar" id="modal-avatar">
+                <div class="modal-header-info">
+                    <h3 id="modal-name"></h3>
+                    <p id="modal-email"></p>
                 </div>
             </div>
-            <div class="modal-details-grid">
-                <div class="detail-item"><label>Provider</label><p id="modal-provider"></p></div>
-                <div class="detail-item"><label>Joined Date</label><p id="modal-joined-date"></p></div>
-                <div class="detail-item"><label>Last Login</label><p id="modal-last-login"></p></div>
-                <div class="detail-item"><label>Device IP</label><p id="modal-device-ip"></p></div>
-                <div class="detail-item"><label>Operating System</label><p id="modal-os"></p></div>
-                <div class="detail-item"><label>Browser</label><p id="modal-browser"></p></div>
-                <div class="detail-item"><label>Device Type</label><p id="modal-device-type"></p></div>
-            </div>
-            <div class="modal-bio">
-                <label>Bio</label>
-                <p id="modal-bio"></p>
+            <div class="modal-body">
+                <h4>User Details</h4>
+                <ul>
+                    <li><strong>Provider(s):</strong> <span id="modal-provider"></span></li>
+                    <li><strong>Joined:</strong> <span id="modal-joined"></span></li>
+                    <li><strong>Last Login:</strong> <span id="modal-last-login"></span></li>
+                    <li><strong>Location:</strong> <span id="modal-location"></span></li>
+                    <li><strong>Last Login IP:</strong> <span id="modal-ip"></span></li>
+                    <li><strong>OS & Browser:</strong> <span id="modal-os-browser"></span></li>
+                    <li><strong>Device:</strong> <span id="modal-device"></span></li>
+                </ul>
+                <div class="modal-bio">
+                    <strong>Bio:</strong>
+                    <p id="modal-bio" style="margin-top: 0.5rem;"></p>
+                </div>
             </div>
             <div class="modal-footer">
-                <button id="delete-user-btn" class="btn btn-danger">Delete User</button>
+                <button class="btn btn-danger" id="delete-user-btn">Delete User</button>
             </div>
         </div>
     </div>
@@ -124,97 +129,86 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
+        let allUsersData = []; 
         const API_BASE_URL = '';
         const ADMIN_EMAIL = "info.open4discuss@gmail.com";
         const currentUser = JSON.parse(localStorage.getItem('currentUser'));
 
-        if (!currentUser || currentUser.email !== ADMIN_EMAIL) {
-            window.location.replace('index.html');
-            return;
-        }
+        if (!currentUser || currentUser.email !== ADMIN_EMAIL) { window.location.replace('index.html'); return; }
 
         const userTableBody = document.getElementById('user-table-body');
         const userModal = document.getElementById('user-modal');
         const modalCloseBtn = document.getElementById('modal-close-btn');
         const deleteUserBtn = document.getElementById('delete-user-btn');
-        
-        let allUsersData = [];
 
-        initUI(); // FIXED: Call initUI which includes the cursor
+        initUI();
         loadUsers();
 
-        modalCloseBtn.addEventListener('click', () => userModal.classList.remove('is-visible'));
-        userModal.addEventListener('click', (e) => { if (e.target === userModal) userModal.classList.remove('is-visible'); });
-        
+        modalCloseBtn.addEventListener('click', closeModal);
+        userModal.addEventListener('click', (e) => { if (e.target === userModal) closeModal(); });
+        deleteUserBtn.addEventListener('click', handleDeleteUser);
+
         async function loadUsers() {
             try {
-                const response = await fetch(`${API_BASE_URL}/api/users`, { headers: { 'X-User-Email': currentUser.email } });
-                const users = await response.json();
-                if (!response.ok) throw new Error(users.message || 'Could not fetch users.');
-                allUsersData = users;
-                renderTable(users);
-            } catch (error) {
-                userTableBody.innerHTML = `<tr><td colspan="3" style="text-align:center; color: var(--error-color); padding: 3rem;">${error.message}</td></tr>`;
-            }
+                const response = await fetch(`${API_BASE_URL}/api/users`, { headers: { 'X-User-Email': currentUser.email }});
+                allUsersData = await response.json();
+                if (!response.ok) throw new Error(allUsersData.message || 'Could not fetch users.');
+                
+                userTableBody.innerHTML = '';
+                if (allUsersData.length === 0) {
+                    userTableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 3rem;">No other users found.</td></tr>`;
+                    return;
+                }
+
+                allUsersData.forEach((user, index) => {
+                    const row = document.createElement('tr');
+                    row.setAttribute('data-index', index);
+                    const defaultAvatar = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2FkYmFjNyI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgM2MxLjY2IDAgMyAxLjM0IDMgM3MtMS4zNCAzLTMgMy0zLTEuMzQtMy0zIDEuMzQtMyAzLTN6bTAgMTRjLTIuMzMgMC00LjMyLTEuNDYtNS4xMi0zLjUxLjc5LTEuMjkgMi44Mi0yLjEzIDUuMTItMi4xMyAyLjI5IDAgNC4zMy44NCA1LjEyIDIuMTNDMTYuMzIgMTcuNTQgMTQuMzMgMTkgMTIgMTl6Ii8+PC9zdmc+';
+                    row.innerHTML = `
+                        <td><div class="user-info"><img src="${user.picture || defaultAvatar}" alt="${user.name}" class="user-avatar"><span>${user.name || 'N/A'}</span></div></td>
+                        <td>${user.email}</td>
+                        <td>${formatTimeAgo(user.lastLoginAt)}</td>
+                        <td>${user.location || 'N/A'}</td>
+                    `;
+                    row.addEventListener('click', () => displayUserDetails(index));
+                    userTableBody.appendChild(row);
+                });
+            } catch (error) { userTableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--error-color); padding: 3rem;">${error.message}</td></tr>`; }
+        }
+
+        function displayUserDetails(index) {
+            const user = allUsersData[index];
+            if (!user) return;
+            const defaultAvatar = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2FkYmFjNyI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgM2MxLjY2IDAgMyAxLjM0IDMgM3MtMS4zNCAzLTMgMy0zLTEuMzQtMy0zIDEuMzQtMyAzLTN6bTAgMTRjLTIuMzMgMC00LjMyLTEuNDYtNS4xMi0zLjUxLjc5LTEuMjkgMi44Mi0yLjEzIDUuMTItMi4xMyAyLjI5IDAgNC4zMy44NCA1LjEyIDIuMTNDMTYuMzIgMTcuNTQgMTQuMzMgMTkgMTIgMTl6Ii8+PC9zdmc+';
+            deleteUserBtn.dataset.userId = user._id;
+            document.getElementById('modal-avatar').src = user.picture || defaultAvatar;
+            document.getElementById('modal-name').textContent = user.name || 'N/A';
+            document.getElementById('modal-email').textContent = user.email || 'N/A';
+            document.getElementById('modal-provider').textContent = user.loginMethod || 'N/A';
+            document.getElementById('modal-joined').textContent = new Date(user.createdAt).toLocaleString();
+            document.getElementById('modal-last-login').textContent = user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleString() : 'Never';
+            document.getElementById('modal-location').textContent = user.location || 'N/A';
+            document.getElementById('modal-ip').textContent = user.lastLoginIp || 'N/A';
+            document.getElementById('modal-os-browser').textContent = `${user.os || 'N/A'} on ${user.browser || 'N/A'}`;
+            document.getElementById('modal-device').textContent = user.device || 'N/A';
+            document.getElementById('modal-bio').textContent = user.bio || 'No bio provided.';
+            userModal.classList.add('active');
+            document.body.classList.add('no-scroll');
         }
         
-        function renderTable(users) {
-            userTableBody.innerHTML = ''; 
-            if (users.length === 0) {
-                userTableBody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 3rem;">No other users found.</td></tr>`;
-                return;
-            }
-            users.forEach(user => {
-                const row = document.createElement('tr');
-                row.dataset.userId = user._id;
-                row.innerHTML = `
-                    <td><div class="user-info"><img src="${user.picture || getDefaultAvatar()}" alt="${user.name}" class="user-avatar"><span>${user.name || 'N/A'}</span></div></td>
-                    <td>${user.email}</td>
-                    <td>${formatTimeAgo(user.lastLoginAt)}</td>
-                `;
-                row.addEventListener('click', () => showUserModal(user._id));
-                userTableBody.appendChild(row);
-            });
-        }
-
-        function showUserModal(userId) {
-            const user = allUsersData.find(u => u._id === userId);
-            if (!user) return;
-            
-            document.getElementById('modal-avatar').src = user.picture || getDefaultAvatar();
-            document.getElementById('modal-user-name').textContent = user.name;
-            document.getElementById('modal-user-email').textContent = user.email;
-            document.getElementById('modal-provider').textContent = user.loginMethod;
-            document.getElementById('modal-joined-date').textContent = new Date(user.createdAt).toLocaleString();
-            document.getElementById('modal-last-login').textContent = new Date(user.lastLoginAt).toLocaleString();
-            document.getElementById('modal-device-ip').textContent = user.lastLoginDetails?.ip || 'N/A';
-            document.getElementById('modal-os').textContent = user.lastLoginDetails?.os || 'N/A';
-            document.getElementById('modal-browser').textContent = user.lastLoginDetails?.browser || 'N/A';
-            document.getElementById('modal-device-type').textContent = user.lastLoginDetails?.device || 'Unknown';
-            document.getElementById('modal-bio').textContent = user.bio || 'No bio provided.';
-            
-            deleteUserBtn.onclick = () => handleDeleteUser(user._id);
-
-            userModal.classList.add('is-visible');
-        }
-
-        async function handleDeleteUser(userId) {
-            if (!confirm('Are you sure you want to permanently delete this user? This cannot be undone.')) return;
-            
+        async function handleDeleteUser() {
+            const userId = deleteUserBtn.dataset.userId;
+            if (!userId) return;
+            if (!confirm('Are you sure you want to permanently delete this user? This action cannot be undone.')) return;
             deleteUserBtn.disabled = true;
             deleteUserBtn.innerHTML = '<span class="spinner"></span> Deleting...';
-
             try {
-                const response = await fetch(`${API_BASE_URL}/api/users/${userId}`, {
-                    method: 'DELETE',
-                    headers: { 'X-User-Email': currentUser.email }
-                });
+                const response = await fetch(`${API_BASE_URL}/api/users/${userId}`, { method: 'DELETE', headers: { 'X-User-Email': currentUser.email } });
                 const result = await response.json();
-                if (!response.ok) throw new Error(result.message);
-
-                showToast(result.message, 'success');
-                userModal.classList.remove('is-visible');
-                document.querySelector(`tr[data-user-id="${userId}"]`).remove();
+                if (!response.ok) throw new Error(result.message || 'Failed to delete user.');
+                showToast('User deleted successfully!', 'success');
+                closeModal();
+                loadUsers();
             } catch (error) {
                 showToast(error.message, 'error');
             } finally {
@@ -222,40 +216,37 @@
                 deleteUserBtn.innerHTML = 'Delete User';
             }
         }
-        
-        // --- UI & HELPER FUNCTIONS ---
-        function initUI() {
-            initCustomCursor();
-            initThemeToggle();
-            document.getElementById('logout-btn').addEventListener('click', () => {
-                localStorage.removeItem('currentUser');
-                showToast('Logging out...', 'success');
-                setTimeout(() => { window.location.replace('index.html'); }, 1000);
-            });
+
+        function closeModal() { userModal.classList.remove('active'); document.body.classList.remove('no-scroll'); }
+
+        function formatTimeAgo(dateString) {
+            if (!dateString) return 'Never';
+            const date = new Date(dateString), now = new Date();
+            const seconds = Math.round((now - date) / 1000);
+            const minutes = Math.round(seconds / 60), hours = Math.round(minutes / 60), days = Math.round(hours / 24);
+            if (seconds < 60) return 'Just now';
+            if (minutes < 60) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+            if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+            if (days < 7) return `${days} day${days > 1 ? 's' : ''} ago`;
+            return date.toLocaleDateString();
         }
 
         function showToast(message, type = 'success') {
             const t = document.querySelector('.toast-notification');
-            if (!t) return;
             t.textContent = message;
             t.className = `toast-notification ${type} show`;
             setTimeout(() => { t.classList.remove('show'); }, 4000);
         }
-        
-        function formatTimeAgo(dateString) {
-            if (!dateString) return 'Never';
-            const date = new Date(dateString); const now = new Date();
-            const seconds = Math.round((now - date) / 1000);
-            const minutes = Math.round(seconds / 60); const hours = Math.round(minutes / 60); const days = Math.round(hours / 24);
-            if (seconds < 60) return 'Just now'; if (minutes < 60) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
-            if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`; if (days < 7) return `${days} day${days > 1 ? 's' : ''} ago`;
-            return date.toLocaleDateString();
-        }
 
+        function initUI() {
+            initCustomCursor();
+            initThemeToggle();
+        }
+        
         function initCustomCursor() {
             const cursorDot = document.querySelector(".cursor-dot"), cursorOutline = document.querySelector(".cursor-outline");
             if (!cursorDot || !cursorOutline) return;
-            const interactiveElements = document.querySelectorAll('a, button, tr[data-user-id]');
+            const interactiveElements = document.querySelectorAll('a, button, [data-index]');
             window.addEventListener("mousemove", (e) => {
                 cursorDot.style.left = `${e.clientX}px`; cursorDot.style.top = `${e.clientY}px`;
                 cursorOutline.animate({ left: `${e.clientX}px`, top: `${e.clientY}px` }, { duration: 500, fill: "forwards" });
@@ -272,9 +263,12 @@
                 document.body.classList.toggle('light-theme');
                 themeToggle.innerHTML = document.body.classList.contains('light-theme') ? '<i class="fas fa-cog"></i>' : '<i class="fas fa-moon"></i>';
             });
+            document.getElementById('logout-btn').addEventListener('click', () => {
+                localStorage.removeItem('currentUser');
+                showToast('Logging out...', 'success');
+                setTimeout(() => { window.location.replace('index.html'); }, 1000);
+            });
         }
-        
-        function getDefaultAvatar() { return 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2FkYmFjNyI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgM2MxLjY2IDAgMyAxLjM0IDMgM3MtMS4zNCAzLTMgMy0zLTEuMzQtMy0zIDEuMzQtMyAzLTN6bTAgMTRjLTIuMzMgMC00LjMyLTEuNDYtNS4xMi0zLjUxLjc5LTEuMjkgMi44Mi0yLjEzIDUuMTItMi4xMyAyLjI5IDAgNC4zMy44NCA1LjEyIDIuMTNDMTYuMzIgMTcuNTQgMTQuMzMgMTkgMTIgMTl6Ii8+PC9zdmc+'; }
     });
     </script>
 </body>
