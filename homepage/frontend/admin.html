@@ -12,23 +12,33 @@
     <link rel="stylesheet" href="style.css">
     <style>
         /* Base and Theme Styles */
-        body { background: linear-gradient(180deg, #0d1117 0%, #161b22 100%); background-attachment: fixed; color: var(--text-color, #e0e0e0); }
+        body { background: linear-gradient(180deg, #0d1117 0%, #161b22 100%); background-attachment: fixed; color: var(--text-color, #e0e0e0); font-family: 'Poppins', sans-serif; }
         body.light-theme { background: #f8f9fa; color: #212529; }
+        .page-container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .section { padding: 6rem 0; opacity: 0; transform: translateY(40px); transition: opacity 0.8s ease-out, transform 0.8s ease-out; }
+        .section.is-visible { opacity: 1; transform: translateY(0); }
+        .section-title { text-align: center; font-size: clamp(2rem, 5vw, 3rem); color: var(--text-color); margin-bottom: 4rem; font-weight: 600; }
+        .section-title span { color: var(--primary-color); }
+        body.light-theme .section-title span { color: #fd7e14; }
+        body.light-theme h1, body.light-theme h2, body.light-theme h3, body.light-theme p { color: #212529; }
+        .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 18px; backdrop-filter: blur(8px); }
+        body.light-theme .card { background-color: #ffffff; border: 1px solid #dee2e6; }
+        .btn { border: none; padding: 10px 24px; border-radius: 8px; font-weight: 600; transition: all 0.3s ease-out; cursor: pointer; text-decoration: none; }
+        
+        /* Header Styles */
+        .top-navbar { position: sticky; top: 0; width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 1rem 5%; background-color: var(--navbar-bg); backdrop-filter: blur(12px); border-bottom: 1px solid var(--card-border); z-index: 1000; }
+        .logo { font-size: 2rem; font-weight: 700; color: var(--primary-color); text-decoration: none; }
+        .header-controls { display: flex; align-items: center; gap: 1rem; }
+        .theme-toggle-btn { background: none; border: 1px solid var(--text-muted); color: var(--text-muted); width: 40px; height: 40px; border-radius: 50%; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
+        .theme-toggle-btn:hover { color: var(--primary-color); border-color: var(--primary-color); transform: scale(1.1); }
         body.light-theme .top-navbar { background-color: #e9ecef; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         body.light-theme .logo { color: #fd7e14; }
-        body.light-theme .btn { color: #fd7e14; }
-        body.light-theme .card { background-color: #ffffff; border: 1px solid #dee2e6; }
-        body.light-theme h1, body.light-theme h2, body.light-theme h3, body.light-theme p { color: #212529; }
-        body.light-theme .section-title span { color: #fd7e14; }
-
-        /* This class is toggled by JavaScript to prevent background scrolling when the modal is open */
-        body.no-scroll { overflow: hidden; }
-
+        
         /* Table Styles */
         .admin-table-container { padding: 1rem; overflow-x: auto; }
         .user-table { width: 100%; border-collapse: collapse; white-space: nowrap; }
         .user-table th, .user-table td { padding: 1rem 1.5rem; text-align: left; border-bottom: 1px solid var(--card-border); }
-        .user-table th { font-weight: 600; color: var(--primary-color); }
+        .user-table th { font-weight: 600; color: var(--primary-color); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; }
         body.light-theme .user-table th { color: #fd7e14; }
         .user-table tbody tr { cursor: pointer; transition: background-color 0.3s ease; }
         .user-table tbody tr:hover { background-color: rgba(255, 255, 255, 0.05); }
@@ -37,7 +47,7 @@
         .user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
         
         /* Modal Styles */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); z-index: 1000; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); z-index: 1001; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease; }
         .modal-overlay.active { display: flex; opacity: 1; }
         .modal-content { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; width: 90%; max-width: 600px; padding: 2.5rem; position: relative; transform: scale(0.95); transition: transform 0.3s ease; }
         .modal-overlay.active .modal-content { transform: scale(1); }
@@ -61,6 +71,11 @@
         .modal-footer { margin-top: 2rem; text-align: right; }
         .btn-danger { background: var(--error-color); color: #fff; box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4); }
         .btn-danger:hover { background: #c82333; filter: brightness(1.1); }
+        body.no-scroll { overflow: hidden; }
+        
+        /* Spinner for loading states */
+        .spinner { display: inline-block; width: 1em; height: 1em; border: 2px solid transparent; border-top-color: currentColor; border-radius: 50%; animation: spin 0.6s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -70,7 +85,7 @@
     <header class="top-navbar">
         <a href="index.html" class="logo">O4D Admin</a>
         <div class="header-controls">
-            <button id="logout-btn" class="btn btn-header-contact" style="padding: 8px 14px;">Logout</button>
+            <button id="logout-btn" class="btn">Logout</button>
             <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Theme"><i class="fas fa-moon"></i></button>
         </div>
     </header>
@@ -236,7 +251,7 @@
 
         function showToast(message, type = 'success') {
             const t = document.querySelector('.toast-notification');
-            if (!t) return;
+            if(!t) return;
             t.textContent = message;
             t.className = `toast-notification ${type} show`;
             setTimeout(() => { t.classList.remove('show'); }, 4000);
@@ -263,15 +278,17 @@
 
         function initThemeToggle() {
             const themeToggle = document.getElementById('theme-toggle');
-            document.getElementById('logout-btn').addEventListener('click', () => {
+            const logoutBtn = document.getElementById('logout-btn');
+
+            themeToggle.addEventListener('click', () => {
+                document.body.classList.toggle('light-theme');
+                themeToggle.innerHTML = document.body.classList.contains('light-theme') ? '<i class="fas fa-cog"></i>' : '<i class="fas fa-moon"></i>';
+            });
+            
+            logoutBtn.addEventListener('click', () => {
                 localStorage.removeItem('currentUser');
                 showToast('Logging out...', 'success');
                 setTimeout(() => { window.location.replace('index.html'); }, 1000);
-            });
-            if (!themeToggle) return;
-            themeToggle.addEventListener('click', () => {
-                document.body.classList.toggle('light-theme');
-                themeToggle.innerHTML = document.body.classList.contains('light-theme') ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
             });
         }
     });
