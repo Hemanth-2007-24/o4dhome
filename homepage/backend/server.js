@@ -41,9 +41,18 @@ const UserSchema = new mongoose.Schema({
     device: { type: String },   // e.g., "iPhone" or "Desktop"
     os: { type: String },       // e.g., "Windows 10"
     browser: { type: String },  // e.g., "Chrome"
+    githubPat: { type: String }, // Stores the user's GitHub Personal Access Token
 }, { timestamps: true }); // Automatically adds createdAt and updatedAt fields
 
 const User = mongoose.model('User', UserSchema);
+
+// --- HELPER FUNCTION TO CREATE A SAFE USER OBJECT (removes password) ---
+const toSafeUserObject = (user) => {
+    if (!user) return null;
+    const userObj = user.toObject ? user.toObject() : { ...user };
+    delete userObj.password;
+    return userObj;
+};
 
 // --- HELPER FUNCTION TO UPDATE LOGIN METADATA ---
 // This function captures user metadata on every successful login.
@@ -111,7 +120,7 @@ app.post('/api/register', async (req, res) => {
         const newUser = new User({ name, email, password: hashedPassword, loginMethod: 'manual' });
         
         await updateLoginDetails(newUser, req); // Capture metadata on registration
-        res.status(201).json(newUser.toObject());
+        res.status(201).json(toSafeUserObject(newUser));
     } catch (error) {
         res.status(500).json({ message: 'Server error during registration.' });
     }
@@ -126,7 +135,7 @@ app.post('/api/login', async (req, res) => {
         if (!await bcrypt.compare(password, user.password)) return res.status(400).json({ message: 'Invalid credentials.' });
         
         await updateLoginDetails(user, req); // Capture metadata on login
-        res.status(200).json(user.toObject());
+        res.status(200).json(toSafeUserObject(user));
     } catch (error) {
         res.status(500).json({ message: 'Server error during login.' });
     }
@@ -137,7 +146,7 @@ app.post('/api/social-login', async (req, res) => {
     try {
         const { name, email, loginMethod, picture } = req.body;
         const user = await findOrCreateUser({ name, email, loginMethod, picture }, req);
-        res.status(200).json(user.toObject());
+        res.status(200).json(toSafeUserObject(user));
     } catch (error) {
         res.status(500).json({ message: 'Server error during social login.' });
     }
@@ -171,7 +180,7 @@ app.get('/api/github/callback', async (req, res) => {
             picture: githubUser.avatar_url,
         }, req);
         
-        const sessionData = Buffer.from(JSON.stringify(user.toObject())).toString('base64');
+        const sessionData = Buffer.from(JSON.stringify(toSafeUserObject(user))).toString('base64');
         res.redirect(`${process.env.FRONTEND_URL}/index.html?session=${sessionData}`);
     } catch (error) {
         console.error('GitHub auth error:', error);
@@ -195,6 +204,31 @@ app.put('/api/profile', async (req, res) => {
         res.status(500).json({ message: 'Server error while updating profile.' });
     }
 });
+
+// --- API: Update User's GitHub PAT ---
+app.put('/api/user/pat', async (req, res) => {
+    const userEmail = req.headers['x-user-email'];
+    const { pat } = req.body;
+
+    if (!userEmail) return res.status(401).json({ message: 'Unauthorized.' });
+    if (typeof pat !== 'string') return res.status(400).json({ message: 'PAT must be a string.' });
+
+    try {
+        const updatedUser = await User.findOneAndUpdate(
+            { email: userEmail },
+            { $set: { githubPat: pat } },
+            { new: true } // Return the updated document
+        );
+
+        if (!updatedUser) return res.status(404).json({ message: 'User not found.' });
+        
+        res.status(200).json(toSafeUserObject(updatedUser)); // Send back the updated user object
+    } catch (error) {
+        console.error('Error updating PAT:', error);
+        res.status(500).json({ message: 'Server error while updating PAT.' });
+    }
+});
+
 
 // --- ADMIN API: Get All Users ---
 app.get('/api/users', async (req, res) => {
