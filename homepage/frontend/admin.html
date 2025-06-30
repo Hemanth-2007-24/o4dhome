@@ -15,18 +15,12 @@
         body { background: linear-gradient(180deg, #0d1117 0%, #161b22 100%); background-attachment: fixed; color: var(--text-color, #e0e0e0); }
         body.light-theme { background: #f8f9fa; color: #212529; }
         body.light-theme .top-navbar { background-color: #e9ecef; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        body.light-theme .logo, body.light-theme .btn-header-contact { color: #fd7e14; }
+        body.light-theme .logo { color: #fd7e14; }
+        body.light-theme .btn-header-contact { background-color: #fd7e14; color: #fff; box-shadow: 0 0 15px rgba(253, 126, 20, 0.6); }
         body.light-theme .card { background-color: #ffffff; border: 1px solid #dee2e6; }
         body.light-theme h1, body.light-theme h2, body.light-theme h3, body.light-theme p { color: #212529; }
         body.light-theme .section-title span { color: #fd7e14; }
         body.no-scroll { overflow: hidden; }
-
-        /* === THE FIX IS HERE === */
-        /* Hide the custom cursor when the modal is open to prevent visual glitches */
-        body.no-scroll .cursor-dot,
-        body.no-scroll .cursor-outline {
-            display: none;
-        }
 
         /* Table Styles */
         .admin-table-container { padding: 1rem; overflow-x: auto; }
@@ -53,15 +47,21 @@
         body.light-theme .modal-avatar { border-color: #fd7e14; }
         .modal-header-info h3 { font-size: 1.8rem; margin: 0; }
         .modal-header-info p { margin: 0; color: var(--text-muted); font-size: 0.9rem; word-break: break-all; }
-        .modal-body h4 { font-size: 1.2rem; color: var(--text-color); border-bottom: 1px solid var(--card-border); padding-bottom: 0.5rem; margin-bottom: 1rem; }
+        .modal-body h4 { list-style: none; font-size: 1.2rem; color: var(--text-color); border-bottom: 1px solid var(--card-border); padding-bottom: 0.5rem; margin-bottom: 1rem; }
         body.light-theme .modal-body h4 { color: #212529; }
         .modal-body ul { list-style: none; padding: 0; }
         .modal-body li { display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 0; border-bottom: 1px solid var(--card-border); }
         .modal-body li:last-child { border-bottom: none; }
         .modal-body li strong { color: var(--primary-color); }
         body.light-theme .modal-body li strong { color: #fd7e14; }
-        .modal-body li span { text-align: right; max-width: 65%; word-break: break-word;}
+        .modal-body li span { text-align: right; max-width: 65%; word-break: break-word; }
         .modal-bio { margin-top: 1.5rem; padding: 1rem; background-color: rgba(0,0,0,0.2); border-radius: 8px; }
+        
+        /* NEW: Styles for the provider tags */
+        .provider-tags-container { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+        .provider-tag { background-color: rgba(255, 255, 255, 0.1); padding: 4px 10px; border-radius: 50px; font-size: 0.85rem; text-transform: capitalize; }
+        .provider-tag i { margin-right: 6px; }
+        
         .modal-footer { margin-top: 2rem; text-align: right; }
         .btn-danger { background: var(--error-color); color: #fff; box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4); }
         .btn-danger:hover { background: #c82333; filter: brightness(1.1); }
@@ -110,7 +110,8 @@
             <div class="modal-body">
                 <h4>User Details</h4>
                 <ul>
-                    <li><strong>Provider(s):</strong> <span id="modal-provider"></span></li>
+                    <!-- UPDATED: Provider(s) list item to hold multiple tags -->
+                    <li><strong>Provider(s):</strong> <span id="modal-provider" class="provider-tags-container"></span></li>
                     <li><strong>Joined:</strong> <span id="modal-joined"></span></li>
                     <li><strong>Last Login:</strong> <span id="modal-last-login"></span></li>
                     <li><strong>Location:</strong> <span id="modal-location"></span></li>
@@ -163,6 +164,7 @@
                     userTableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 3rem;">No other users found.</td></tr>`;
                     return;
                 }
+
                 allUsersData.forEach((user, index) => {
                     const row = document.createElement('tr');
                     row.setAttribute('data-index', index);
@@ -184,24 +186,43 @@
             if (!user) return;
             const defaultAvatar = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2FkYmFjNyI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgM2MxLjY2IDAgMyAxLjM0IDMgM3MtMS4zNCAzLTMgMy0zLTEuMzQtMy0zIDEuMzQtMyAzLTN6bTAgMTRjLTIuMzMgMC00LjMyLTEuNDYtNS4xMi0zLjUxLjc5LTEuMjkgMi44Mi0yLjEzIDUuMTItMi4xMyAyLjI5IDAgNC4zMy44NCA1LjEyIDIuMTNDMTYuMzIgMTcuNTQgMTQuMzMgMTkgMTIgMTl6Ii8+PC9zdmc+';
             deleteUserBtn.dataset.userId = user._id;
+            
+            // --- UPDATED: Polished Data Display ---
             document.getElementById('modal-avatar').src = user.picture || defaultAvatar;
             document.getElementById('modal-name').textContent = user.name || 'N/A';
             document.getElementById('modal-email').textContent = user.email || 'N/A';
-            document.getElementById('modal-provider').textContent = user.loginMethod || 'N/A';
+            
+            const providersContainer = document.getElementById('modal-provider');
+            providersContainer.innerHTML = ''; // Clear previous tags
+            if(user.loginMethod) {
+                user.loginMethod.split(',').forEach(method => {
+                    const cleanMethod = method.trim();
+                    const iconClass = getIconForMethod(cleanMethod);
+                    const tag = document.createElement('span');
+                    tag.className = 'provider-tag';
+                    tag.innerHTML = `<i class="${iconClass}"></i> ${cleanMethod}`;
+                    providersContainer.appendChild(tag);
+                });
+            } else {
+                providersContainer.textContent = 'N/A';
+            }
+
             document.getElementById('modal-joined').textContent = new Date(user.createdAt).toLocaleString();
             document.getElementById('modal-last-login').textContent = user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleString() : 'Never';
             document.getElementById('modal-location').textContent = user.location || 'N/A';
             document.getElementById('modal-ip').textContent = user.lastLoginIp || 'N/A';
-            document.getElementById('modal-os-browser').textContent = `${user.os || 'N/A'} on ${user.browser || 'N/A'}`;
+            document.getElementById('modal-os-browser').textContent = (user.os && user.browser) ? `${user.os} on ${user.browser}` : 'N/A';
             document.getElementById('modal-device').textContent = user.device || 'N/A';
             document.getElementById('modal-bio').textContent = user.bio || 'No bio provided.';
+            
             userModal.classList.add('active');
             document.body.classList.add('no-scroll');
         }
         
         async function handleDeleteUser() {
             const userId = deleteUserBtn.dataset.userId;
-            if (!userId || !confirm('Are you sure you want to permanently delete this user? This action cannot be undone.')) return;
+            if (!userId) return;
+            if (!confirm('Are you sure you want to permanently delete this user? This action cannot be undone.')) return;
             deleteUserBtn.disabled = true;
             deleteUserBtn.innerHTML = '<span class="spinner"></span> Deleting...';
             try {
@@ -233,6 +254,13 @@
             return date.toLocaleDateString();
         }
 
+        function getIconForMethod(method) {
+            if (method.includes('google')) return 'fab fa-google';
+            if (method.includes('facebook')) return 'fab fa-facebook-f';
+            if (method.includes('github')) return 'fab fa-github';
+            return 'fas fa-envelope'; // Icon for 'manual'
+        }
+
         function showToast(message, type = 'success') {
             const t = document.querySelector('.toast-notification');
             if(!t) return;
@@ -249,7 +277,7 @@
         function initCustomCursor() {
             const cursorDot = document.querySelector(".cursor-dot"), cursorOutline = document.querySelector(".cursor-outline");
             if (!cursorDot || !cursorOutline) return;
-            const interactiveElements = document.querySelectorAll('a, button, [data-index], .modal-close');
+            const interactiveElements = document.querySelectorAll('a, button, [data-index]');
             window.addEventListener("mousemove", (e) => {
                 cursorDot.style.left = `${e.clientX}px`; cursorDot.style.top = `${e.clientY}px`;
                 cursorOutline.animate({ left: `${e.clientX}px`, top: `${e.clientY}px` }, { duration: 500, fill: "forwards" });
