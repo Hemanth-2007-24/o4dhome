@@ -15,12 +15,18 @@
         body { background: linear-gradient(180deg, #0d1117 0%, #161b22 100%); background-attachment: fixed; color: var(--text-color, #e0e0e0); }
         body.light-theme { background: #f8f9fa; color: #212529; }
         body.light-theme .top-navbar { background-color: #e9ecef; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        body.light-theme .logo { color: #fd7e14; }
-        body.light-theme .btn-header-contact { background-color: #fd7e14; color: #fff; box-shadow: 0 0 15px rgba(253, 126, 20, 0.6); }
+        body.light-theme .logo, body.light-theme .btn-header-contact { color: #fd7e14; }
         body.light-theme .card { background-color: #ffffff; border: 1px solid #dee2e6; }
         body.light-theme h1, body.light-theme h2, body.light-theme h3, body.light-theme p { color: #212529; }
         body.light-theme .section-title span { color: #fd7e14; }
         body.no-scroll { overflow: hidden; }
+
+        /* === THE FIX IS HERE === */
+        /* Hide the custom cursor when the modal is open to prevent visual glitches */
+        body.no-scroll .cursor-dot,
+        body.no-scroll .cursor-outline {
+            display: none;
+        }
 
         /* Table Styles */
         .admin-table-container { padding: 1rem; overflow-x: auto; }
@@ -33,8 +39,6 @@
         body.light-theme .user-table tbody tr:hover { background-color: #f1f3f5; }
         .user-info { display: flex; align-items: center; gap: 15px; }
         .user-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
-        .login-method { text-transform: capitalize; }
-        .login-method .fab, .login-method .fas { font-size: 1.2rem; margin-right: 8px; vertical-align: middle; }
         
         /* Modal Styles */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); z-index: 1000; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s ease; }
@@ -159,7 +163,6 @@
                     userTableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 3rem;">No other users found.</td></tr>`;
                     return;
                 }
-
                 allUsersData.forEach((user, index) => {
                     const row = document.createElement('tr');
                     row.setAttribute('data-index', index);
@@ -198,8 +201,7 @@
         
         async function handleDeleteUser() {
             const userId = deleteUserBtn.dataset.userId;
-            if (!userId) return;
-            if (!confirm('Are you sure you want to permanently delete this user? This action cannot be undone.')) return;
+            if (!userId || !confirm('Are you sure you want to permanently delete this user? This action cannot be undone.')) return;
             deleteUserBtn.disabled = true;
             deleteUserBtn.innerHTML = '<span class="spinner"></span> Deleting...';
             try {
@@ -233,6 +235,7 @@
 
         function showToast(message, type = 'success') {
             const t = document.querySelector('.toast-notification');
+            if(!t) return;
             t.textContent = message;
             t.className = `toast-notification ${type} show`;
             setTimeout(() => { t.classList.remove('show'); }, 4000);
@@ -246,7 +249,7 @@
         function initCustomCursor() {
             const cursorDot = document.querySelector(".cursor-dot"), cursorOutline = document.querySelector(".cursor-outline");
             if (!cursorDot || !cursorOutline) return;
-            const interactiveElements = document.querySelectorAll('a, button, [data-index]');
+            const interactiveElements = document.querySelectorAll('a, button, [data-index], .modal-close');
             window.addEventListener("mousemove", (e) => {
                 cursorDot.style.left = `${e.clientX}px`; cursorDot.style.top = `${e.clientY}px`;
                 cursorOutline.animate({ left: `${e.clientX}px`, top: `${e.clientY}px` }, { duration: 500, fill: "forwards" });
